@@ -528,3 +528,66 @@ queryFilesBtn.addEventListener('click', async () => {
     queryFilesBtn.textContent = '查询文件';
   }
 });
+
+const API_ENDPOINT_DETECT = 
+  'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/detect_and_query';
+
+const detectInput      = document.getElementById('detectInput');
+const detectBtn        = document.getElementById('detectBtn');
+const detectResultArea = document.getElementById('detectResultArea');
+
+detectBtn.addEventListener('click', async () => {
+  detectResultArea.innerHTML = '';
+
+  // 1. 校验登录
+  const idToken = getIdToken();
+  if (!idToken) {
+    detectResultArea.innerHTML = '<p class="error">⚠️ 未获得 id_token，请先登录！</p>';
+    return;
+  }
+
+  // 2. 读取并校验输入
+  const mediaUrl = detectInput.value.trim();
+  if (!mediaUrl) {
+    detectResultArea.innerHTML = '<p class="error">⚠️ 请输入 S3 URL</p>';
+    return;
+  }
+
+  detectBtn.disabled   = true;
+  detectBtn.textContent = '查询中…';
+
+  try {
+    // 3. 发送 POST 请求
+    const resp = await fetch(API_ENDPOINT_DETECT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ media_url: mediaUrl })
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+    const data = await resp.json();
+    // data = { detected_labels: [...], query_by_species_result: { links: [...] }, thumbnail_url }
+
+    // 4. 拼 HTML 展示
+    let html = `<p class="result-title">检测到的标签：${data.detected_labels.join(', ')}</p>`;
+    html += '<p class="result-title">同标签文件列表：</p><ul class="links-list">';
+    data.query_by_species_result.links.forEach(url => {
+      html += `<li><a href="${url}" target="_blank">${url}</a></li>`;
+    });
+    html += '</ul>';
+    if (data.thumbnail_url) {
+      html += `<p>缩略图 URL：<code>${data.thumbnail_url}</code></p>`;
+    }
+    detectResultArea.innerHTML = html;
+
+  } catch (err) {
+    console.error(err);
+    detectResultArea.innerHTML = `<p class="error">查询失败：${err.message}</p>`;
+  } finally {
+    detectBtn.disabled   = false;
+    detectBtn.textContent = '查询同标签文件';
+  }
+});

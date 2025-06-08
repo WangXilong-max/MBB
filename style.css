@@ -58,12 +58,12 @@ body::before {
   margin-bottom: 30px;
 }
 .header h1 {
-  font-size: 2rem;
+  font-size: 6rem;
   margin-bottom: 8px;
   color: var(--color-text-main);
 }
 .header p {
-  font-size: 1rem;
+  font-size: 3rem;
   color: var(--color-text-secondary);
 }
 

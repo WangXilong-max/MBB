@@ -358,14 +358,34 @@ const deleteUrlsInput   = document.getElementById('deleteUrlsInput');
 const deleteFilesBtn    = document.getElementById('deleteFilesBtn');
 const deleteResultArea  = document.getElementById('deleteResultArea');
 
+// —— 从 URL hash 提取 Cognito ID Token —— 
+function getIdToken() {
+  const hash = window.location.hash.startsWith("#")
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const params = new URLSearchParams(hash);
+  return params.get("id_token");
+}
+
 deleteFilesBtn.addEventListener('click', async () => {
+  // 清空旧结果
   deleteResultArea.innerHTML = '';
+
+  // 1. 获取并校验 id_token
+  const idToken = getIdToken();
+  if (!idToken) {
+    deleteResultArea.innerHTML = `<p class="error">⚠️ 未获得 id_token，请先登录！</p>`;
+    return;
+  }
+
+  // 2. 读取并验证 URL 列表
   const raw = deleteUrlsInput.value.trim();
   if (!raw) {
     deleteResultArea.innerHTML = `<p class="error">⚠️ 请先输入至少一个 URL</p>`;
     return;
   }
-  const urlList = raw.split('\n')
+  const urlList = raw
+    .split('\n')
     .map(u => u.trim())
     .filter(u => u.length);
   if (!urlList.length) {
@@ -373,31 +393,35 @@ deleteFilesBtn.addEventListener('click', async () => {
     return;
   }
 
+  // 3. 禁用按钮并提示中
   deleteFilesBtn.disabled = true;
   deleteFilesBtn.textContent = '删除中…';
 
   try {
+    // 4. 发起带鉴权的删除请求
     const resp = await fetch(API_ENDPOINT_DELETE_FILES, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
       },
       body: JSON.stringify({ urls: urlList })
     });
 
     const data = await resp.json();
     if (resp.ok) {
-      deleteResultArea.innerHTML = 
+      deleteResultArea.innerHTML =
         `<p class="success">✅ 删除成功：${data.message}</p>`;
     } else {
-      deleteResultArea.innerHTML = 
+      deleteResultArea.innerHTML =
         `<p class="error">❌ 删除失败：${data.message || resp.status}</p>`;
     }
   } catch (err) {
     console.error(err);
-    deleteResultArea.innerHTML = 
+    deleteResultArea.innerHTML =
       `<p class="error">🚨 异常：${err.message}</p>`;
   } finally {
+    // 5. 恢复按钮状态
     deleteFilesBtn.disabled = false;
     deleteFilesBtn.textContent = '删除选中文件';
   }

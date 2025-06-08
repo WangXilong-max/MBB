@@ -32,7 +32,13 @@ async function handleFile(file) {
   try {
     uploadResult.textContent = '获取上传链接中...';
     const query = `?filename=${encodeURIComponent(file.name)}`;
-    const resp = await fetch(PRESIGN_API + query, { method: 'GET' });
+    const resp = await fetch(PRESIGN_API + query, {
+      method: 'GET',
+      headers: {
+        // 把你的 id_token 放在 Authorization 头中
+        'Authorization': `Bearer ${idToken}`
+      }
+    });
     if (!resp.ok) throw new Error(`无法获取 presigned URL，状态：${resp.status}`);
     const { uploadUrl, objectKey, contentType } = await resp.json();
 

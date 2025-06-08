@@ -260,6 +260,25 @@ body::before {
   color: var(--color-error);
 }
 
+/* 缩略图列表布局 */
+.thumb-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+/* 缩略图样式 */
+.thumb-container img {
+  max-width: 160px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform .2s ease;
+}
+.thumb-container img:hover {
+  transform: scale(1.05);
+}
+
 /* 响应式：小屏幕时让输入框自动撑满并堆叠按钮 */
 @media (max-width: 600px) {
   .input-group {

@@ -260,6 +260,29 @@ body::before {
   color: var(--color-error);
 }
 
+/* 1. 让标签查询那边的 <ul> 也去掉圆点 */
+.result-area ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+/* 2. 美化 “tag-row” 排版，保证 input + input + 按钮 横向对齐 */
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;          /* 各个控件之间留一点空隙 */
+  margin-bottom: 12px;
+}
+.tag-row .tag-input,
+.tag-row .count-input {
+  flex: 1;           /* 平均分摊可用宽度 */
+  min-width: 0;      /* 防止输入框超出容器 */
+}
+.tag-row .remove-tag-btn {
+  flex-shrink: 0;    /* 保持删除按钮大小不变 */
+  padding: 0 8px;    /* 根据需要微调按钮内边距 */
+}
+
 /* 响应式：小屏幕时让输入框自动撑满并堆叠按钮 */
 @media (max-width: 600px) {
   .input-group {

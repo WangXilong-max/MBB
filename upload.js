@@ -530,7 +530,7 @@ queryFilesBtn.addEventListener('click', async () => {
 });
 
 const API_ENDPOINT_DETECT = 
-  'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/detect_and_query';
+  'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/query_files';
 
 const detectInput      = document.getElementById('detectInput');
 const detectBtn        = document.getElementById('detectBtn');

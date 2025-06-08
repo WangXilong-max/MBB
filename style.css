@@ -55,18 +55,23 @@ body::before {
 /* 头部标题 */
 .header {
   text-align: center;
-  margin-bottom: 30px;
+  /* 上下外边距一次性写在这里：20vh 从顶部往下推到接近屏幕中部 */
+  margin: 20vh 0 30px;  
 }
+
 .header h1 {
   font-size: 4rem;
-   margin-head: 24px;
   margin-bottom: 8px;
-  color: rgba(255,255,255,0.8);
+  color: #000;  /* 改成纯黑 */
+  /* 2px x 2px 位移，4px 模糊，轻微阴影效果 */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
+
 .header p {
   font-size: 1.5rem;
-   margin-bottom: 24px;
-  color: rgba(255,255,255,0.8);
+  color: #000;  /* 纯黑 */
+  /* 1px x 1px 位移，2px 模糊，更柔和的副标题阴影 */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 

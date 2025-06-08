@@ -142,11 +142,20 @@ searchBtn.addEventListener("click", () => {
       if (Array.isArray(data.links) && data.links.length) {
         data.links.forEach(link => {
           const li = document.createElement("li");
-          const a = document.createElement("a");
-          a.href = link;
-          a.target = "_blank";
-          a.textContent = link;
-          li.appendChild(a);
+          if (link.includes("/thumbnail/")) {
+            const img = document.createElement("img");
+            img.src = link;
+            img.alt = "";
+            img.style.width = "150px";
+            img.style.margin = "4px";
+            li.appendChild(img);
+          } else {
+            const a = document.createElement("a");
+            a.href = link;
+            a.target = "_blank";
+            a.textContent = link.split("/").pop();
+            li.appendChild(a);
+          }
           linksList.appendChild(li);
         });
       } else {

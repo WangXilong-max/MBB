@@ -97,19 +97,19 @@ https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
 
     <!-- 6.  -->
     <section class="card query-section">
-      <h2 class="card-title">Search files by tag</h2>
+      <h2 class="card-title">Search files by tags</h2>
 
-      <div class="form-group">
-        <label for="queryTagInput">Tag name (tag):</label>
-        <input id="queryTagInput" type="text" class="form-control" placeholder="For example：cat" />
+      <!-- 容器，用来放多行 tag-row -->
+      <div id="tagContainer">
+        <div class="form-row tag-row">
+          <input type="text" class="form-control tag-input" placeholder="Tag name (e.g. pigeon)" />
+          <input type="number" class="form-control count-input" placeholder="Min count (e.g. 1)" min="1" />
+          <button type="button" class="btn btn-sm btn-danger remove-tag-btn">×</button>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="queryCountInput">Minimum number of occurrences (count):</label>
-        <input id="queryCountInput" type="number" class="form-control" placeholder="For example：2" min="1" />
-      </div>
 
-      <button id="queryFilesBtn" class="btn btn-secondary">Query File</button>
-
+      <button id="addTagBtn" class="btn btn-sm btn-outline-primary">添加 Tag</button>
+      <button id="queryFilesBtn" class="btn btn-secondary">查询文件</button>
       <div id="queryResultArea" class="result-area"></div>
     </section>
 

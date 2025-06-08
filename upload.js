@@ -200,19 +200,28 @@ function getIdToken() {
 }
 
 thumbBtn.addEventListener("click", async () => {
-  thumbResult.innerHTML = "";
+  // 清空上次结果
+  while (thumbResult.firstChild) {
+    thumbResult.removeChild(thumbResult.firstChild);
+  }
 
   // 1. 检查登录 token
   const idToken = getIdToken();
   if (!idToken) {
-    thumbResult.innerHTML = `<p class="error">⚠️ 未获得 id_token，请先登录！</p>`;
+    const errP = document.createElement("p");
+    errP.className = "error";
+    errP.textContent = "⚠️ 未获得 id_token，请先登录！";
+    thumbResult.appendChild(errP);
     return;
   }
 
   // 2. 校验用户输入
   const thumbUrl = thumbInput.value.trim();
   if (!thumbUrl) {
-    thumbResult.innerHTML = `<p class="error">⚠️ 请先输入一个缩略图 S3 URL。</p>`;
+    const errP = document.createElement("p");
+    errP.className = "error";
+    errP.textContent = "⚠️ 请先输入一个缩略图 S3 URL。";
+    thumbResult.appendChild(errP);
     return;
   }
 
@@ -235,16 +244,32 @@ thumbBtn.addEventListener("click", async () => {
     const data = await resp.json();
     if (!data.full_image_url) throw new Error("后端未返回 full_image_url");
 
-    // 5. 显示结果
-    thumbResult.innerHTML = `
-      <p class="success">查询成功！原图 URL：</p>
-      <a href="${data.full_image_url}" target="_blank">${data.full_image_url}</a>
-    `;
+    // 5. 用 DOM API 显示成功提示
+    const successP = document.createElement("p");
+    successP.className = "success";
+    successP.textContent = "查询成功！";
+    thumbResult.appendChild(successP);
+
+    // 6. 创建“下载原图”链接
+    const fullUrl = data.full_image_url;
+    const filename = fullUrl.split("/").pop();
+    const dlLink = document.createElement("a");
+    dlLink.href = fullUrl;
+    dlLink.textContent = "下载原图";
+    dlLink.download = filename;       // 关键 ——  点击直接下载
+    dlLink.target = "_blank";
+    dlLink.style.display = "block";
+    dlLink.style.marginTop = "8px";
+    thumbResult.appendChild(dlLink);
+
   } catch (err) {
     console.error(err);
-    thumbResult.innerHTML = `<p class="error">❌ 查询失败：${err.message}</p>`;
+    const errP = document.createElement("p");
+    errP.className = "error";
+    errP.textContent = `❌ 查询失败：${err.message}`;
+    thumbResult.appendChild(errP);
   } finally {
-    // 6. 恢复按钮状态
+    // 7. 恢复按钮状态
     thumbBtn.disabled = false;
     thumbBtn.textContent = "查询原图";
   }

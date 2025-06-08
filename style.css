@@ -20,12 +20,27 @@
   box-sizing: border-box;
 }
 
+/* 背景图 + 全局样式 */
 body {
-  background-color: var(--color-bg);
+  /* 背景图：请把 background.jpg 放在项目的 assets 目录下 */
+  background: url('./assets/background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
+
+  /* 原有全局样式 */
   font-family: "Helvetica Neue", Arial, sans-serif;
   color: var(--color-text-main);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* 半透明遮罩层 */
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 0;
 }
 
 /* 页面整体居中容器 */
@@ -33,6 +48,8 @@ body {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 /* 头部标题 */
@@ -79,7 +96,7 @@ body {
 
 /* 文本输入框 */
 .text-input {
-  width: calc(100% - 112px); /* 留出按钮宽度 */
+  width: calc(100% - 112px);
   padding: 8px 10px;
   font-size: 0.95rem;
   border: 1px solid var(--color-border);
@@ -116,7 +133,6 @@ body {
   transition: background-color 0.2s ease;
   margin-left: 8px;
 }
-
 .btn:hover {
   background-color: var(--color-primary-hover);
 }
@@ -125,7 +141,6 @@ body {
 .btn-primary {
   background-color: var(--color-primary);
 }
-
 .btn-primary:hover {
   background-color: var(--color-primary-hover);
 }

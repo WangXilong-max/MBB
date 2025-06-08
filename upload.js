@@ -177,25 +177,42 @@ thumbBtn.addEventListener("click", async () => {
   }
 });
 
-const API_ENDPOINT_GET_LABELS   = "https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/edittag";
-const API_ENDPOINT_UPDATE_TAGS  = "https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/edittag";
-const urlsInput          = document.getElementById("urlsInput");
-const fetchLabelsBtn     = document.getElementById("fetchLabelsBtn");
-const currentLabelsArea  = document.getElementById("currentLabelsArea");
-const tagsInput          = document.getElementById("tagsInput");
-const submitUpdateBtn    = document.getElementById("submitUpdateBtn");
-const updateResultArea   = document.getElementById("updateResultArea");
+// —— 从 URL hash 提取 Cognito ID Token —— 
+function getIdToken() {
+  const hash = window.location.hash.startsWith('#')
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const params = new URLSearchParams(hash);
+  return params.get('id_token');
+}
 
+const API_ENDPOINT_GET_LABELS  = "https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/edittag";
+const API_ENDPOINT_UPDATE_TAGS = "https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/edittag";
+
+const urlsInput         = document.getElementById("urlsInput");
+const fetchLabelsBtn    = document.getElementById("fetchLabelsBtn");
+const currentLabelsArea = document.getElementById("currentLabelsArea");
+const tagsInput         = document.getElementById("tagsInput");
+const submitUpdateBtn   = document.getElementById("submitUpdateBtn");
+const updateResultArea  = document.getElementById("updateResultArea");
+
+// —— 获取当前标签 —— 
 fetchLabelsBtn.addEventListener("click", async () => {
   currentLabelsArea.innerHTML = "";
-  updateResultArea.innerHTML = "";
+  updateResultArea.innerHTML  = "";
+
+  const idToken = getIdToken();
+  if (!idToken) {
+    currentLabelsArea.innerHTML = `<div class="error">⚠️ 未获得 id_token，请先登录！</div>`;
+    return;
+  }
 
   const rawUrls = urlsInput.value.trim();
   if (!rawUrls) {
     currentLabelsArea.innerHTML = `<div class="error">⚠️ 请先输入至少一个 URL，每行一个。</div>`;
     return;
   }
-  const urlList = rawUrls.split("\n").map(line => line.trim()).filter(line => line.length);
+  const urlList = rawUrls.split("\n").map(l => l.trim()).filter(l => l);
   if (!urlList.length) {
     currentLabelsArea.innerHTML = `<div class="error">⚠️ 无效的 URL 列表，请检查输入。</div>`;
     return;
@@ -206,13 +223,18 @@ fetchLabelsBtn.addEventListener("click", async () => {
 
   try {
     const qs = urlList.map(u => "url=" + encodeURIComponent(u)).join("&");
-    const resp = await fetch(`${API_ENDPOINT_GET_LABELS}?${qs}`, { method: "GET" });
+    const resp = await fetch(`${API_ENDPOINT_GET_LABELS}?${qs}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`
+      }
+    });
     if (!resp.ok) throw new Error("后端返回状态：" + resp.status);
     const data = await resp.json();
 
     currentLabelsArea.innerHTML = "";
     const results = data.results || {};
-
     urlList.forEach(u => {
       const labels = results[u] || {};
       const section = document.createElement("div");
@@ -240,15 +262,22 @@ fetchLabelsBtn.addEventListener("click", async () => {
   }
 });
 
+// —— 提交更新标签 —— 
 submitUpdateBtn.addEventListener("click", async () => {
   updateResultArea.innerHTML = "";
+
+  const idToken = getIdToken();
+  if (!idToken) {
+    updateResultArea.innerHTML = `<div class="error">⚠️ 未获得 id_token，请先登录！</div>`;
+    return;
+  }
 
   const rawUrls = urlsInput.value.trim();
   if (!rawUrls) {
     updateResultArea.innerHTML = `<div class="error">⚠️ 请先在上方输入 URL 列表并获取当前标签。</div>`;
     return;
   }
-  const urlList = rawUrls.split("\n").map(line => line.trim()).filter(line => line.length);
+  const urlList = rawUrls.split("\n").map(l => l.trim()).filter(l => l);
   if (!urlList.length) {
     updateResultArea.innerHTML = `<div class="error">⚠️ 无效的 URL 列表，请检查输入。</div>`;
     return;
@@ -258,38 +287,35 @@ submitUpdateBtn.addEventListener("click", async () => {
   try {
     tagsObj = JSON.parse(tagsInput.value.trim());
     if (typeof tagsObj !== "object" || Array.isArray(tagsObj)) {
-      throw new Error("必须是一个 {\"tag1\":number, ...} 形式的对象");
+      throw new Error("必须是一个 {\"tag\":number, ...} 对象");
     }
-    for (let key in tagsObj) {
-      if (typeof tagsObj[key] !== "number") {
-        throw new Error(`标签 "${key}" 的值必须是数字`);
-      }
-    }
+    Object.entries(tagsObj).forEach(([k, v]) => {
+      if (typeof v !== "number") throw new Error(`标签 "${k}" 的值必须是数字`);
+    });
   } catch (err) {
     updateResultArea.innerHTML = `<div class="error">⚠️ 标签字典 JSON 错误：${err.message}</div>`;
     return;
   }
 
-  const opType = document.querySelector('input[name="opType"]:checked').value;
+  const opType   = document.querySelector('input[name="opType"]:checked').value;
   const operation = parseInt(opType, 10);  // 1=累加，0=减少
 
   submitUpdateBtn.disabled = true;
   submitUpdateBtn.textContent = "提交中...";
 
-  const payload = {
-    url: urlList,
-    operation: operation,
-    tags: tagsObj
-  };
+  const payload = { url: urlList, operation, tags: tagsObj };
 
   try {
     const resp = await fetch(API_ENDPOINT_UPDATE_TAGS, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`
+      },
       body: JSON.stringify(payload)
     });
     if (!resp.ok) throw new Error("后端返回状态：" + resp.status);
-    const text = await resp.text();  // 一般为 "tags updated!"
+    const text = await resp.text();
     updateResultArea.innerHTML = `<div class="result">✅ 操作成功，后端返回：<br>${text}</div>`;
   } catch (err) {
     console.error(err);

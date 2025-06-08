@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>文件上传 & 按物种检索 & 缩略图→原图 & 标签管理 Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 引入更新后的样式表 -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <!-- 页面标题 -->
+    <header class="header">
+      <h1>文件上传 & 管理 Demo</h1>
+      <p>拖拽或点击上传文件，按物种检索已识别文件，以及标签管理等功能示例。</p>
+    </header>
+
+    <!-- 1. 拖拽/点击上传区 -->
+    <section class="card upload-section">
+      <h2 class="card-title">拖拽或点击上传文件</h2>
+      <div id="dropZone" class="drop-zone">
+        <span class="drop-icon">📂</span>
+        <p>把文件拖放到这里，或点击选择</p>
+        <input type="file" id="fileInput" class="file-input" />
+      </div>
+      <div id="progressContainer" class="progress-container">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+      <div id="uploadResult" class="upload-result"></div>
+    </section>
+
+    <!-- 2. 按物种检索 -->
+    <section class="card search-section">
+      <h2 class="card-title">按物种搜索已识别文件</h2>
+      <label for="speciesInput" class="form-label">
+        输入鸟类物种（英文小写，多个用英文逗号分隔），例如：<code>crow,pigeon</code>
+      </label>
+      <div class="input-group">
+        <input type="text" id="speciesInput" class="text-input" placeholder="如：crow,pigeon" />
+        <button id="searchBtn" class="btn">开始查询</button>
+      </div>
+      <div id="searchResults" class="result-area">
+        <h3 class="result-title">查询结果：</h3>
+        <ul id="linksList" class="links-list"></ul>
+      </div>
+    </section>
+
+    <!-- 3. 缩略图→原图 -->
+    <section class="card thumb-section">
+      <h2 class="card-title">根据缩略图 S3 URL 查找原图</h2>
+      <label for="thumbInput" class="form-label">
+        输入缩略图的 S3 URL，例如：<code>https://team163-bucket.s3.amazonaws.com/thumbnail/xxx_thumb.jpg</code>
+      </label>
+      <div class="input-group">
+        <input type="text" id="thumbInput" class="text-input" placeholder="https://team163-bucket.s3.amazonaws.com/thumbnail/xxx_thumb.jpg" />
+        <button id="thumbBtn" class="btn">查询原图</button>
+      </div>
+      <div id="thumbResult" class="result-area"></div>
+    </section>
+
+    <!-- 4. 标签管理 -->
+    <section class="card label-section">
+      <h2 class="card-title">标签管理</h2>
+
+      <label for="urlsInput" class="form-label">请输入 S3 对象 URL（每行一个）：</label>
+      <textarea id="urlsInput" class="text-area" placeholder="示例：
+https://team163-bucket.s3.amazonaws.com/image/foo.jpg
+https://team163-bucket.s3.amazonaws.com/image/bar.jpg"></textarea>
+      <button id="fetchLabelsBtn" class="btn btn-primary">获取当前标签</button>
+      <div id="currentLabelsArea" class="labels-display"></div>
+
+      <label class="form-label">请选择操作类型：</label>
+      <div class="radio-group">
+        <label><input type="radio" name="opType" value="1" checked /> 添加/增加标签</label>
+        <label><input type="radio" name="opType" value="0" /> 减少/删除标签</label>
+      </div>
+
+      <label for="tagsInput" class="form-label">请输入要操作的标签字典 (JSON 格式)：</label>
+      <input type="text" id="tagsInput" class="text-input" placeholder='例如：{"crow":2,"sparrow":1}' />
+      <button id="submitUpdateBtn" class="btn btn-primary">提交更新标签</button>
+      <div id="updateResultArea" class="result-area"></div>
+    </section>
+
+    <!-- 5. 删除文件 -->
+    <section class="card delete-section">
+      <h2 class="card-title">删除文件</h2>
+
+      <label for="deleteUrlsInput" class="form-label">
+      请输入要删除的 S3 对象 URL（每行一个）：
+      </label>
+      <textarea id="deleteUrlsInput" class="text-area"
+        placeholder="示例：  
+https://team163-bucket.s3.amazonaws.com/image/foo.jpg  
+https://team163-bucket.s3.amazonaws.com/video/bar.mp4"></textarea>
+      <button id="deleteFilesBtn" class="btn btn-primary">删除选中文件</button>
+      <div id="deleteResultArea" class="result-area"></div>
+    </section>
+
+    <!-- 在文件管理的其它 <section> 之后，插入： -->
+    <section class="card query-section">
+      <h2 class="card-title">按标签查询文件</h2>
+
+      <div class="form-group">
+        <label for="queryTagInput">标签名 (tag):</label>
+        <input id="queryTagInput" type="text" class="form-control" placeholder="例如：cat" />
+      </div>
+      <div class="form-group">
+        <label for="queryCountInput">最小出现次数 (count):</label>
+        <input id="queryCountInput" type="number" class="form-control" placeholder="例如：2" min="1" />
+      </div>
+
+      <button id="queryFilesBtn" class="btn btn-secondary">查询文件</button>
+
+      <div id="queryResultArea" class="result-area"></div>
+    </section>
+  </div>
+
+  <!-- 引入脚本 -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="upload.js"></script>
+</body>
+</html>

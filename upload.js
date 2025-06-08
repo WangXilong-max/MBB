@@ -497,78 +497,128 @@ deleteFilesBtn.addEventListener('click', async () => {
   }
 });
 
-// —— 按标签查询文件 —— 
-const API_QUERY_ENDPOINT = 'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/Find_image_video'; 
-const queryTagInput     = document.getElementById('queryTagInput');
-const queryCountInput   = document.getElementById('queryCountInput');
+const API_QUERY_ENDPOINT = 'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/Find_image_video';
+const tagContainer      = document.getElementById('tagContainer');
+const addTagBtn         = document.getElementById('addTagBtn');
 const queryFilesBtn     = document.getElementById('queryFilesBtn');
 const queryResultArea   = document.getElementById('queryResultArea');
 
+// 从 URL hash 提取 Cognito ID Token
 function getIdToken() {
-  const hash = window.location.hash.startsWith('#')
-    ? window.location.hash.slice(1)
-    : window.location.hash;
-  const params = new URLSearchParams(hash);
-  return params.get('id_token');
+  const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+  return new URLSearchParams(hash).get('id_token');
 }
 
+// 创建一个新的 tag-row 节点
+function createTagRow() {
+  const row = document.createElement('div');
+  row.className = 'form-row tag-row';
+  
+  const tagInput = document.createElement('input');
+  tagInput.type = 'text';
+  tagInput.className = 'form-control tag-input';
+  tagInput.placeholder = 'Tag name (e.g. pigeon)';
+  
+  const countInput = document.createElement('input');
+  countInput.type = 'number';
+  countInput.className = 'form-control count-input';
+  countInput.placeholder = 'Min count (e.g. 1)';
+  countInput.min = '1';
+  
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.className = 'btn btn-sm btn-danger remove-tag-btn';
+  removeBtn.textContent = '×';
+  removeBtn.addEventListener('click', () => {
+    tagContainer.removeChild(row);
+  });
+
+  row.append(tagInput, countInput, removeBtn);
+  tagContainer.appendChild(row);
+}
+
+// 收集所有 tag–count 对，返回一个对象 { tag1: count1, tag2: count2, … }
+function collectTags() {
+  const tags = {};
+  document.querySelectorAll('.tag-row').forEach(row => {
+    const tag = row.querySelector('.tag-input').value.trim();
+    const count = parseInt(row.querySelector('.count-input').value, 10);
+    if (tag && !isNaN(count) && count > 0) {
+      tags[tag] = count;
+    }
+  });
+  return tags;
+}
+
+// 绑事件：添加行
+addTagBtn.addEventListener('click', createTagRow);
+
+// 绑事件：查询
 queryFilesBtn.addEventListener('click', async () => {
-  // 1. 获取并校验 id_token
+  // 清空上次结果
+  queryResultArea.innerHTML = '';
+
+  // 1. 验证登录
   const idToken = getIdToken();
   if (!idToken) {
-    queryResultArea.innerHTML = `<p class="error">⚠️ 未获得 id_token，请先登录！</p>`;
+    const p = document.createElement('p');
+    p.className = 'error';
+    p.textContent = '⚠️ 未获得 id_token，请先登录！';
+    queryResultArea.appendChild(p);
     return;
   }
 
-  // 2. 读取并验证输入
-  const tag   = queryTagInput.value.trim();
-  const count = parseInt(queryCountInput.value, 10);
-  queryResultArea.innerHTML = '';
-  if (!tag || isNaN(count) || count < 1) {
-    queryResultArea.innerHTML = `<p class="error">⚠️ 请填写有效的标签名和最小次数</p>`;
+  // 2. 收集 tags
+  const tags = collectTags();
+  if (Object.keys(tags).length === 0) {
+    const p = document.createElement('p');
+    p.className = 'error';
+    p.textContent = '⚠️ 请至少填写一个有效的 Tag 和 Count。';
+    queryResultArea.appendChild(p);
     return;
   }
 
+  // 3. 发请求前禁用按钮
   queryFilesBtn.disabled = true;
   queryFilesBtn.textContent = '查询中…';
 
   try {
-    // 3. 发起带鉴权请求
     const resp = await fetch(API_QUERY_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${idToken}`
       },
-      body: JSON.stringify({ tags: { [tag]: count } })
+      body: JSON.stringify({ tags })
     });
-
     const data = await resp.json();
-    if (!resp.ok) {
-      throw new Error(data.message || resp.statusText);
-    }
+    if (!resp.ok) throw new Error(data.message || resp.statusText);
 
     // 4. 渲染结果
-    if (!data.links || data.links.length === 0) {
-      queryResultArea.innerHTML = `<p>ℹ️ 未找到满足条件的文件。</p>`;
+    if (!Array.isArray(data.links) || data.links.length === 0) {
+      const p = document.createElement('p');
+      p.textContent = 'ℹ️ 未找到满足条件的文件。';
+      queryResultArea.appendChild(p);
     } else {
-      const list = document.createElement('ul');
+      const ul = document.createElement('ul');
       data.links.forEach(url => {
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href        = url;
         a.target      = '_blank';
-        a.textContent = url;
+        a.textContent = url.split('/').pop();
         li.appendChild(a);
-        list.appendChild(li);
+        ul.appendChild(li);
       });
-      queryResultArea.appendChild(list);
+      queryResultArea.appendChild(ul);
     }
   } catch (err) {
     console.error(err);
-    queryResultArea.innerHTML = `<p class="error">🚨 查询失败：${err.message}</p>`;
+    const p = document.createElement('p');
+    p.className = 'error';
+    p.textContent = `🚨 查询失败：${err.message}`;
+    queryResultArea.appendChild(p);
   } finally {
-    // 5. 恢复按钮状态
     queryFilesBtn.disabled = false;
     queryFilesBtn.textContent = '查询文件';
   }

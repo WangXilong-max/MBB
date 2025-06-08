@@ -435,10 +435,25 @@ const queryCountInput   = document.getElementById('queryCountInput');
 const queryFilesBtn     = document.getElementById('queryFilesBtn');
 const queryResultArea   = document.getElementById('queryResultArea');
 
+function getIdToken() {
+  const hash = window.location.hash.startsWith('#')
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const params = new URLSearchParams(hash);
+  return params.get('id_token');
+}
+
 queryFilesBtn.addEventListener('click', async () => {
+  // 1. 获取并校验 id_token
+  const idToken = getIdToken();
+  if (!idToken) {
+    queryResultArea.innerHTML = `<p class="error">⚠️ 未获得 id_token，请先登录！</p>`;
+    return;
+  }
+
+  // 2. 读取并验证输入
   const tag   = queryTagInput.value.trim();
   const count = parseInt(queryCountInput.value, 10);
-
   queryResultArea.innerHTML = '';
   if (!tag || isNaN(count) || count < 1) {
     queryResultArea.innerHTML = `<p class="error">⚠️ 请填写有效的标签名和最小次数</p>`;
@@ -449,9 +464,13 @@ queryFilesBtn.addEventListener('click', async () => {
   queryFilesBtn.textContent = '查询中…';
 
   try {
+    // 3. 发起带鉴权请求
     const resp = await fetch(API_QUERY_ENDPOINT, {
-      method: 'POST',  // 如果你想用 GET，也可以把 body 改成拼接 ?tag1=... 
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
       body: JSON.stringify({ tags: { [tag]: count } })
     });
 
@@ -460,10 +479,10 @@ queryFilesBtn.addEventListener('click', async () => {
       throw new Error(data.message || resp.statusText);
     }
 
-    if (data.links.length === 0) {
+    // 4. 渲染结果
+    if (!data.links || data.links.length === 0) {
       queryResultArea.innerHTML = `<p>ℹ️ 未找到满足条件的文件。</p>`;
     } else {
-      // 把返回的 URL 列表渲染成链接或缩略图
       const list = document.createElement('ul');
       data.links.forEach(url => {
         const li = document.createElement('li');
@@ -477,8 +496,10 @@ queryFilesBtn.addEventListener('click', async () => {
       queryResultArea.appendChild(list);
     }
   } catch (err) {
+    console.error(err);
     queryResultArea.innerHTML = `<p class="error">🚨 查询失败：${err.message}</p>`;
   } finally {
+    // 5. 恢复按钮状态
     queryFilesBtn.disabled = false;
     queryFilesBtn.textContent = '查询文件';
   }

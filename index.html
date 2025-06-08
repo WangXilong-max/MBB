@@ -37,7 +37,7 @@
         Enter the bird species (lowercase letters, separate multiple species with commas), for example:<code>crow,pigeon</code>
       </label>
       <div class="input-group">
-        <input type="text" id="speciesInput" class="text-input" placeholder="like：crow,pigeon" />
+        <input type="text" id="speciesInput" class="text-input" placeholder="" />
         <button id="searchBtn" class="btn">Start query</button>
       </div>
       <div id="searchResults" class="result-area">
@@ -50,10 +50,10 @@
     <section class="card thumb-section">
       <h2 class="card-title">Find the original image based on the thumbnail S3 URL</h2>
       <label for="thumbInput" class="form-label">
-        Enter the S3 URL of the thumbnail, for example:<code>https://team163-bucket.s3.amazonaws.com/thumbnail/xxx_thumb.jpg</code>
+        Enter the S3 URL of the thumbnail, for example:<code>https://team163-bucket.s3.amazonaws.com/thumbnail/crows_1.jpg</code>
       </label>
       <div class="input-group">
-        <input type="text" id="thumbInput" class="text-input" placeholder="https://team163-bucket.s3.amazonaws.com/thumbnail/xxx_thumb.jpg" />
+        <input type="text" id="thumbInput" class="text-input" placeholder="" />
         <button id="thumbBtn" class="btn">Query original image</button>
       </div>
       <div id="thumbResult" class="result-area"></div>
@@ -65,8 +65,7 @@
 
       <label for="urlsInput" class="form-label">Enter the S3 object URLs, one per line:</label>
       <textarea id="urlsInput" class="text-area" placeholder="For example：
-https://team163-bucket.s3.amazonaws.com/image/foo.jpg
-https://team163-bucket.s3.amazonaws.com/image/bar.jpg"></textarea>
+https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
       <button id="fetchLabelsBtn" class="btn btn-primary">Get the current label</button>
       <div id="currentLabelsArea" class="labels-display"></div>
 
@@ -91,8 +90,7 @@ https://team163-bucket.s3.amazonaws.com/image/bar.jpg"></textarea>
       </label>
       <textarea id="deleteUrlsInput" class="text-area"
         placeholder="For example：  
-https://team163-bucket.s3.amazonaws.com/image/foo.jpg  
-https://team163-bucket.s3.amazonaws.com/video/bar.mp4"></textarea>
+https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
       <button id="deleteFilesBtn" class="btn btn-primary">Delete selected files</button>
       <div id="deleteResultArea" class="result-area"></div>
     </section>

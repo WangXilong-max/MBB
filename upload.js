@@ -536,6 +536,14 @@ const detectInput      = document.getElementById('detectInput');
 const detectBtn        = document.getElementById('detectBtn');
 const detectResultArea = document.getElementById('detectResultArea');
 
+function getIdToken() {
+  const hash = window.location.hash.startsWith('#')
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const params = new URLSearchParams(hash);
+  return params.get('id_token');
+}
+
 detectBtn.addEventListener('click', async () => {
   detectResultArea.innerHTML = '';
 

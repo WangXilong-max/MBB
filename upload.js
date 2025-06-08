@@ -1,10 +1,19 @@
-const PRESIGN_API = 'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/presignedURL';
+const PRESIGN_API      = 'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/presignedURL';
 const YOUR_BUCKET_NAME = 'team163-bucket';
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
-const progressContainer = document.getElementById('progressContainer');
-const progressBar = document.getElementById('progressBar');
-const uploadResult = document.getElementById('uploadResult');
+const dropZone         = document.getElementById('dropZone');
+const fileInput        = document.getElementById('fileInput');
+const progressContainer= document.getElementById('progressContainer');
+const progressBar      = document.getElementById('progressBar');
+const uploadResult     = document.getElementById('uploadResult');
+
+// —— 从 URL hash 提取 Cognito ID Token —— 
+function getIdToken() {
+  const hash = window.location.hash.startsWith('#')
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const params = new URLSearchParams(hash);
+  return params.get('id_token');
+}
 
 dropZone.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', (e) => {
@@ -25,17 +34,32 @@ dropZone.addEventListener('drop', (e) => {
 });
 
 async function handleFile(file) {
-  uploadResult.textContent = '';
-  progressBar.style.width = '0%';
+  // 1. 获取并校验 id_token
+  const idToken = getIdToken();
+  if (!idToken) {
+    alert('⚠️ 未获得 id_token，请先登录！');
+    return;
+  }
+
+  uploadResult.textContent           = '';
+  progressBar.style.width            = '0%';
   progressContainer.style.visibility = 'visible';
 
   try {
+    // 2. 获取 presigned URL 时带上 Authorization 头
     uploadResult.textContent = '获取上传链接中...';
     const query = `?filename=${encodeURIComponent(file.name)}`;
-    const resp = await fetch(PRESIGN_API + query, { method: 'GET' });
+    const resp = await fetch(PRESIGN_API + query, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      }
+    });
     if (!resp.ok) throw new Error(`无法获取 presigned URL，状态：${resp.status}`);
     const { uploadUrl, objectKey, contentType } = await resp.json();
 
+    // 3. 上传文件到 S3（无需再带 Cognito 头，URL 自带签名）
     uploadResult.textContent = '开始上传文件...';
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', uploadUrl, true);

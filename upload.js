@@ -164,7 +164,7 @@ searchBtn.addEventListener("click", () => {
             const a = document.createElement("a");
             a.href = link;
             a.target = "_blank";
-            a.textContent = link.split("/").pop();
+            a.textContent = link;
             li.appendChild(a);
           }
 

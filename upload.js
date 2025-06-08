@@ -91,79 +91,78 @@ async function handleFile(file) {
 }
 
 const API_ENDPOINT_FIND_BY_SPECIES = "https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/query_by_species";
-const searchBtn       = document.getElementById("searchBtn");
-const speciesInput    = document.getElementById("speciesInput");
-const thumbContainer  = document.getElementById("thumbContainer");
+const searchBtn = document.getElementById("searchBtn");
+const speciesInput = document.getElementById("speciesInput");
+const linksList = document.getElementById("linksList");
 
-// 重用已有的 getIdToken() 函数
-searchBtn.addEventListener("click", startSearch);
+// 从 window.location.hash 里提取 token
+function getIdToken() {
+  const hash = window.location.hash.startsWith("#")
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const params = new URLSearchParams(hash);
+  return params.get("id_token");
+}
 
-async function startSearch() {
-  // 清空旧内容
-  thumbContainer.innerHTML = "";
-
-  // 1. 验证登录
+searchBtn.addEventListener("click", () => {
   const idToken = getIdToken();
   if (!idToken) {
-    alert("⚠️ 未获得 id_token，请先登录！");
+    alert("未获得 id_token，请先登录！");
     return;
   }
 
-  // 2. 读取并校验输入
   const raw = speciesInput.value.trim();
   if (!raw) {
-    alert("请输入至少一个物种（英文小写，逗号分隔）。");
+    alert("请先输入至少一个物种（英文小写，逗号分隔）。");
     return;
   }
   const arr = raw.split(",").map(s => s.trim()).filter(s => s);
   if (!arr.length) {
-    alert("请输入合法的物种列表，例如：crow 或 crow,pigeon");
+    alert("请输入合法的物种列表，比如：crow 或 crow,pigeon");
     return;
   }
 
-  // 3. 构造查询 URL
-  const qs  = arr.map(sp => `species=${encodeURIComponent(sp)}`).join("&");
+  const qs = arr.map(sp => `species=${encodeURIComponent(sp)}`).join("&");
   const url = `${API_ENDPOINT_FIND_BY_SPECIES}?${qs}`;
 
-  try {
-    // 4. 发请求
-    const resp = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`
-      }
-    });
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-    const data = await resp.json();
-    const items = data.items || [];
-
-    // 5. 渲染缩略图
-    if (!items.length) {
-      thumbContainer.innerHTML = "<p>没有匹配到任何文件。</p>";
-      return;
+  fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      // 根据你在 API Gateway Cognito Authorizer 中的配置，决定是否要加 “Bearer ” 前缀
+      "Authorization": `Bearer ${idToken}`
     }
-    items.forEach(item => {
-      // a) 包裹一个 <a>，点击可预览或下载原图
-      const link = document.createElement("a");
-      link.href   = item.mediaUrl;
-      link.target = "_blank";
-      link.download = "";  // 有 download 属性浏览器就会下载
-
-      // b) 缩略图 <img>
-      const img = document.createElement("img");
-      img.src = item.thumbnailUrl;
-      img.alt = "thumbnail";
-
-      link.appendChild(img);
-      thumbContainer.appendChild(link);
+  })
+    .then(resp => {
+      if (!resp.ok) throw new Error("HTTP 错误：" + resp.status);
+      return resp.json();
+    })
+    .then(data => {
+      linksList.innerHTML = "";
+      if (Array.isArray(data.links) && data.links.length) {
+        data.links.forEach(link => {
+          const li = document.createElement("li");
+          const a = document.createElement("a");
+          a.href = link;
+          a.target = "_blank";
+          a.textContent = link;
+          li.appendChild(a);
+          linksList.appendChild(li);
+        });
+      } else {
+        const li = document.createElement("li");
+        li.textContent = "没有匹配到任何文件。";
+        linksList.appendChild(li);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      linksList.innerHTML = "";
+      const li = document.createElement("li");
+      li.textContent = "查询出错，请检查控制台日志。";
+      linksList.appendChild(li);
     });
-
-  } catch (err) {
-    console.error(err);
-    thumbContainer.innerHTML = `<p class="error">查询出错，请检查控制台日志。</p>`;
-  }
-}
+});
 
 const API_ENDPOINT_FIND_BY_THUMB = "https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/query";
 const thumbBtn    = document.getElementById("thumbBtn");

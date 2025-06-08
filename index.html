@@ -18,10 +18,10 @@
 
     <!-- 1. 拖拽/点击上传区 -->
     <section class="card upload-section">
-      <h2 class="card-title">拖拽或点击上传文件</h2>
+      <h2 class="card-title">Drag or click to upload files</h2>
       <div id="dropZone" class="drop-zone">
         <span class="drop-icon">📂</span>
-        <p>把文件拖放到这里，或点击选择</p>
+        <p>Drag and drop files here, or click Select</p>
         <input type="file" id="fileInput" class="file-input" />
       </div>
       <div id="progressContainer" class="progress-container">
@@ -32,101 +32,103 @@
 
     <!-- 2. 按物种检索 -->
     <section class="card search-section">
-      <h2 class="card-title">按物种搜索已识别文件</h2>
+      <h2 class="card-title">Search identified files by species</h2>
       <label for="speciesInput" class="form-label">
-        输入鸟类物种（英文小写，多个用英文逗号分隔），例如：<code>crow,pigeon</code>
+        Enter the bird species (lowercase letters, separate multiple species with commas), for example:<code>crow,pigeon</code>
       </label>
       <div class="input-group">
-        <input type="text" id="speciesInput" class="text-input" placeholder="如：crow,pigeon" />
-        <button id="searchBtn" class="btn">开始查询</button>
+        <input type="text" id="speciesInput" class="text-input" placeholder="like：crow,pigeon" />
+        <button id="searchBtn" class="btn">Start query</button>
       </div>
       <div id="searchResults" class="result-area">
-        <h3 class="result-title">查询结果：</h3>
+        <h3 class="result-title">Query results:</h3>
         <ul id="linksList" class="links-list"></ul>
       </div>
     </section>
 
     <!-- 3. 缩略图→原图 -->
     <section class="card thumb-section">
-      <h2 class="card-title">根据缩略图 S3 URL 查找原图</h2>
+      <h2 class="card-title">Find the original image based on the thumbnail S3 URL</h2>
       <label for="thumbInput" class="form-label">
-        输入缩略图的 S3 URL，例如：<code>https://team163-bucket.s3.amazonaws.com/thumbnail/xxx_thumb.jpg</code>
+        Enter the S3 URL of the thumbnail, for example:<code>https://team163-bucket.s3.amazonaws.com/thumbnail/xxx_thumb.jpg</code>
       </label>
       <div class="input-group">
         <input type="text" id="thumbInput" class="text-input" placeholder="https://team163-bucket.s3.amazonaws.com/thumbnail/xxx_thumb.jpg" />
-        <button id="thumbBtn" class="btn">查询原图</button>
+        <button id="thumbBtn" class="btn">Query original image</button>
       </div>
       <div id="thumbResult" class="result-area"></div>
     </section>
 
     <!-- 4. 标签管理 -->
     <section class="card label-section">
-      <h2 class="card-title">标签管理</h2>
+      <h2 class="card-title">Tag Management</h2>
 
-      <label for="urlsInput" class="form-label">请输入 S3 对象 URL（每行一个）：</label>
-      <textarea id="urlsInput" class="text-area" placeholder="示例：
+      <label for="urlsInput" class="form-label">Enter the S3 object URLs, one per line:</label>
+      <textarea id="urlsInput" class="text-area" placeholder="For example：
 https://team163-bucket.s3.amazonaws.com/image/foo.jpg
 https://team163-bucket.s3.amazonaws.com/image/bar.jpg"></textarea>
-      <button id="fetchLabelsBtn" class="btn btn-primary">获取当前标签</button>
+      <button id="fetchLabelsBtn" class="btn btn-primary">Get the current label</button>
       <div id="currentLabelsArea" class="labels-display"></div>
 
-      <label class="form-label">请选择操作类型：</label>
+      <label class="form-label">Please select the operation type:</label>
       <div class="radio-group">
-        <label><input type="radio" name="opType" value="1" checked /> 添加/增加标签</label>
-        <label><input type="radio" name="opType" value="0" /> 减少/删除标签</label>
+        <label><input type="radio" name="opType" value="1" checked /> Add/Add Tags</label>
+        <label><input type="radio" name="opType" value="0" /> Reduce/remove tags/label>
       </div>
 
-      <label for="tagsInput" class="form-label">请输入要操作的标签字典 (JSON 格式)：</label>
-      <input type="text" id="tagsInput" class="text-input" placeholder='例如：{"crow":2,"sparrow":1}' />
-      <button id="submitUpdateBtn" class="btn btn-primary">提交更新标签</button>
+      <label for="tagsInput" class="form-label">Please enter the tag dictionary to operate on (JSON format):</label>
+      <input type="text" id="tagsInput" class="text-input" placeholder='For example：{"crow":2,"sparrow":1}' />
+      <button id="submitUpdateBtn" class="btn btn-primary">Submit Update Tags</button>
       <div id="updateResultArea" class="result-area"></div>
     </section>
 
     <!-- 5. 删除文件 -->
     <section class="card delete-section">
-      <h2 class="card-title">删除文件</h2>
+      <h2 class="card-title">Deleting files</h2>
 
       <label for="deleteUrlsInput" class="form-label">
-      请输入要删除的 S3 对象 URL（每行一个）：
+      Enter the S3 object URLs to delete, one per line:
       </label>
       <textarea id="deleteUrlsInput" class="text-area"
-        placeholder="示例：  
+        placeholder="For example：  
 https://team163-bucket.s3.amazonaws.com/image/foo.jpg  
 https://team163-bucket.s3.amazonaws.com/video/bar.mp4"></textarea>
-      <button id="deleteFilesBtn" class="btn btn-primary">删除选中文件</button>
+      <button id="deleteFilesBtn" class="btn btn-primary">Delete selected files</button>
       <div id="deleteResultArea" class="result-area"></div>
     </section>
+
     <!-- 6.  -->
     <section class="card query-section">
-      <h2 class="card-title">按标签查询文件</h2>
+      <h2 class="card-title">Search files by tag</h2>
 
       <div class="form-group">
-        <label for="queryTagInput">标签名 (tag):</label>
-        <input id="queryTagInput" type="text" class="form-control" placeholder="例如：cat" />
+        <label for="queryTagInput">Tag name (tag):</label>
+        <input id="queryTagInput" type="text" class="form-control" placeholder="For example：cat" />
       </div>
       <div class="form-group">
-        <label for="queryCountInput">最小出现次数 (count):</label>
-        <input id="queryCountInput" type="number" class="form-control" placeholder="例如：2" min="1" />
+        <label for="queryCountInput">Minimum number of occurrences (count):</label>
+        <input id="queryCountInput" type="number" class="form-control" placeholder="For example：2" min="1" />
       </div>
 
-      <button id="queryFilesBtn" class="btn btn-secondary">查询文件</button>
+      <button id="queryFilesBtn" class="btn btn-secondary">Query File</button>
 
       <div id="queryResultArea" class="result-area"></div>
     </section>
+
     <!-- 7.  -->
     <section class="card detect-section">
-      <h2 class="card-title">按媒体 URL 查询同标签文件</h2>
+      <h2 class="card-title">Query files with the same tag by media URL</h2>
       <label for="detectInput" class="form-label">
-      输入媒体的 S3 URL
+      Enter the S3 URL of your media
       </label>
       <div class="input-group">
         <input
           type="text"
           id="detectInput"
           class="text-input"
-          placeholder="s3://team163-bucket/thumbnail/xxx.jpg"
+          placeholder="https://team163-bucket.s3.amazonaws.com/image/foo.jpg"
         />
-        <button id="detectBtn" class="btn">查询同标签文件</button>
+        <button id="detectBtn" class="btn">Query files with the same tag</button>
       </div>
       <div id="detectResultArea" class="result-area"></div>
     </section>

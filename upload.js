@@ -177,15 +177,6 @@ thumbBtn.addEventListener("click", async () => {
   }
 });
 
-// —— 从 URL hash 提取 Cognito ID Token —— 
-function getIdToken() {
-  const hash = window.location.hash.startsWith('#')
-    ? window.location.hash.slice(1)
-    : window.location.hash;
-  const params = new URLSearchParams(hash);
-  return params.get('id_token');
-}
-
 const API_ENDPOINT_GET_LABELS  = "https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/edittag";
 const API_ENDPOINT_UPDATE_TAGS = "https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/edittag";
 
@@ -195,6 +186,14 @@ const currentLabelsArea = document.getElementById("currentLabelsArea");
 const tagsInput         = document.getElementById("tagsInput");
 const submitUpdateBtn   = document.getElementById("submitUpdateBtn");
 const updateResultArea  = document.getElementById("updateResultArea");
+
+function getIdToken() {
+  const hash = window.location.hash.startsWith('#')
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const params = new URLSearchParams(hash);
+  return params.get('id_token');
+}
 
 // —— 获取当前标签 —— 
 fetchLabelsBtn.addEventListener("click", async () => {

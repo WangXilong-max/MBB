@@ -141,29 +141,56 @@ searchBtn.addEventListener("click", () => {
 });
 
 const API_ENDPOINT_FIND_BY_THUMB = "https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/query";
-const thumbBtn = document.getElementById("thumbBtn");
-const thumbInput = document.getElementById("thumbInput");
+const thumbBtn    = document.getElementById("thumbBtn");
+const thumbInput  = document.getElementById("thumbInput");
 const thumbResult = document.getElementById("thumbResult");
+
+// —— 从 URL hash 提取 Cognito ID Token —— 
+function getIdToken() {
+  const hash = window.location.hash.startsWith("#")
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const params = new URLSearchParams(hash);
+  return params.get("id_token");
+}
 
 thumbBtn.addEventListener("click", async () => {
   thumbResult.innerHTML = "";
+
+  // 1. 检查登录 token
+  const idToken = getIdToken();
+  if (!idToken) {
+    thumbResult.innerHTML = `<p class="error">⚠️ 未获得 id_token，请先登录！</p>`;
+    return;
+  }
+
+  // 2. 校验用户输入
   const thumbUrl = thumbInput.value.trim();
   if (!thumbUrl) {
     thumbResult.innerHTML = `<p class="error">⚠️ 请先输入一个缩略图 S3 URL。</p>`;
     return;
   }
+
+  // 3. 禁用按钮并提示中
   thumbBtn.disabled = true;
   thumbBtn.textContent = "查询中...";
 
   try {
+    // 4. 发起带鉴权的请求
     const resp = await fetch(API_ENDPOINT_FIND_BY_THUMB, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`
+      },
       body: JSON.stringify({ thumbnail_url: thumbUrl })
     });
     if (!resp.ok) throw new Error("后端返回状态：" + resp.status);
+
     const data = await resp.json();
     if (!data.full_image_url) throw new Error("后端未返回 full_image_url");
+
+    // 5. 显示结果
     thumbResult.innerHTML = `
       <p class="success">查询成功！原图 URL：</p>
       <a href="${data.full_image_url}" target="_blank">${data.full_image_url}</a>
@@ -172,6 +199,7 @@ thumbBtn.addEventListener("click", async () => {
     console.error(err);
     thumbResult.innerHTML = `<p class="error">❌ 查询失败：${err.message}</p>`;
   } finally {
+    // 6. 恢复按钮状态
     thumbBtn.disabled = false;
     thumbBtn.textContent = "查询原图";
   }

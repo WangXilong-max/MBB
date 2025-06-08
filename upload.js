@@ -142,6 +142,7 @@ searchBtn.addEventListener("click", () => {
       if (Array.isArray(data.links) && data.links.length) {
         data.links.forEach(link => {
           const li = document.createElement("li");
+
           if (link.includes("/thumbnail/")) {
             const img = document.createElement("img");
             img.src = link;
@@ -149,6 +150,16 @@ searchBtn.addEventListener("click", () => {
             img.style.width = "150px";
             img.style.margin = "4px";
             li.appendChild(img);
+            
+            const urlLink = document.createElement("a");
+            urlLink.href = link;
+            urlLink.target = "_blank";
+            urlLink.textContent = link;
+            urlLink.style.display = "block";
+            urlLink.style.fontSize = "0.8rem";
+            urlLink.style.marginTop = "4px";
+            li.appendChild(urlLink);
+            
           } else {
             const a = document.createElement("a");
             a.href = link;
@@ -156,6 +167,7 @@ searchBtn.addEventListener("click", () => {
             a.textContent = link.split("/").pop();
             li.appendChild(a);
           }
+
           linksList.appendChild(li);
         });
       } else {

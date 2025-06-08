@@ -71,21 +71,44 @@ const searchBtn = document.getElementById("searchBtn");
 const speciesInput = document.getElementById("speciesInput");
 const linksList = document.getElementById("linksList");
 
+// 从 window.location.hash 里提取 token
+function getIdToken() {
+  const hash = window.location.hash.startsWith("#")
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const params = new URLSearchParams(hash);
+  return params.get("id_token");
+}
+
 searchBtn.addEventListener("click", () => {
-  let raw = speciesInput.value.trim();
+  const idToken = getIdToken();
+  if (!idToken) {
+    alert("未获得 id_token，请先登录！");
+    return;
+  }
+
+  const raw = speciesInput.value.trim();
   if (!raw) {
     alert("请先输入至少一个物种（英文小写，逗号分隔）。");
     return;
   }
-  let arr = raw.split(",").map(s => s.trim()).filter(s => s.length);
+  const arr = raw.split(",").map(s => s.trim()).filter(s => s);
   if (!arr.length) {
     alert("请输入合法的物种列表，比如：crow 或 crow,pigeon");
     return;
   }
-  const qs = arr.map(sp => `species=${encodeURIComponent(sp)}`).join("&");
-  const url = API_ENDPOINT_FIND_BY_SPECIES + "?" + qs;
 
-  fetch(url, { method: "GET" })
+  const qs = arr.map(sp => `species=${encodeURIComponent(sp)}`).join("&");
+  const url = `${API_ENDPOINT_FIND_BY_SPECIES}?${qs}`;
+
+  fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      // 根据你在 API Gateway Cognito Authorizer 中的配置，决定是否要加 “Bearer ” 前缀
+      "Authorization": `Bearer ${idToken}`
+    }
+  })
     .then(resp => {
       if (!resp.ok) throw new Error("HTTP 错误：" + resp.status);
       return resp.json();

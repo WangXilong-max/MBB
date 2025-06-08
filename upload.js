@@ -452,8 +452,7 @@ deleteFilesBtn.addEventListener('click', async () => {
 });
 
 // —— 按标签查询文件 —— 
-const API_QUERY_ENDPOINT = 
-  'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/Find_image_video'; 
+const API_QUERY_ENDPOINT = 'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/Find_image_video'; 
 const queryTagInput     = document.getElementById('queryTagInput');
 const queryCountInput   = document.getElementById('queryCountInput');
 const queryFilesBtn     = document.getElementById('queryFilesBtn');
@@ -529,8 +528,7 @@ queryFilesBtn.addEventListener('click', async () => {
   }
 });
 
-const API_ENDPOINT_DETECT = 
-  'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/query_files';
+const API_ENDPOINT_DETECT = 'https://ajens8j2c5.execute-api.us-east-1.amazonaws.com/test/query_files';
 
 const detectInput      = document.getElementById('detectInput');
 const detectBtn        = document.getElementById('detectBtn');

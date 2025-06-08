@@ -505,26 +505,28 @@ const queryResultArea   = document.getElementById('queryResultArea');
 
 // 从 URL hash 提取 Cognito ID Token
 function getIdToken() {
-  const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+  const hash = window.location.hash.startsWith('#') 
+    ? window.location.hash.slice(1) 
+    : window.location.hash;
   return new URLSearchParams(hash).get('id_token');
 }
 
-// 创建一个新的 tag-row 节点
+// 创建一行 tag + count + 删除 按钮
 function createTagRow() {
   const row = document.createElement('div');
   row.className = 'form-row tag-row';
-  
+
   const tagInput = document.createElement('input');
   tagInput.type = 'text';
   tagInput.className = 'form-control tag-input';
   tagInput.placeholder = 'Tag name (e.g. pigeon)';
-  
+
   const countInput = document.createElement('input');
   countInput.type = 'number';
   countInput.className = 'form-control count-input';
   countInput.placeholder = 'Min count (e.g. 1)';
   countInput.min = '1';
-  
+
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
   removeBtn.className = 'btn btn-sm btn-danger remove-tag-btn';
@@ -537,7 +539,7 @@ function createTagRow() {
   tagContainer.appendChild(row);
 }
 
-// 收集所有 tag–count 对，返回一个对象 { tag1: count1, tag2: count2, … }
+// 收集所有 tag–count 对
 function collectTags() {
   const tags = {};
   document.querySelectorAll('.tag-row').forEach(row => {
@@ -550,15 +552,20 @@ function collectTags() {
   return tags;
 }
 
-// 绑事件：添加行
+// 初始化：如果没有任何 tag-row，就加一行
+if (tagContainer.querySelectorAll('.tag-row').length === 0) {
+  createTagRow();
+}
+
+// 绑定“添加 Tag”按钮
 addTagBtn.addEventListener('click', createTagRow);
 
-// 绑事件：查询
+// 绑定“查询文件”按钮
 queryFilesBtn.addEventListener('click', async () => {
   // 清空上次结果
   queryResultArea.innerHTML = '';
 
-  // 1. 验证登录
+  // 检验登录
   const idToken = getIdToken();
   if (!idToken) {
     const p = document.createElement('p');
@@ -568,7 +575,7 @@ queryFilesBtn.addEventListener('click', async () => {
     return;
   }
 
-  // 2. 收集 tags
+  // 收集 tags
   const tags = collectTags();
   if (Object.keys(tags).length === 0) {
     const p = document.createElement('p');
@@ -578,7 +585,7 @@ queryFilesBtn.addEventListener('click', async () => {
     return;
   }
 
-  // 3. 发请求前禁用按钮
+  // 发请求前禁用按钮
   queryFilesBtn.disabled = true;
   queryFilesBtn.textContent = '查询中…';
 
@@ -591,27 +598,45 @@ queryFilesBtn.addEventListener('click', async () => {
       },
       body: JSON.stringify({ tags })
     });
+
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.message || resp.statusText);
 
-    // 4. 渲染结果
+    // 渲染结果
     if (!Array.isArray(data.links) || data.links.length === 0) {
       const p = document.createElement('p');
       p.textContent = 'ℹ️ 未找到满足条件的文件。';
       queryResultArea.appendChild(p);
     } else {
       const ul = document.createElement('ul');
-      data.links.forEach(url => {
+      data.links.forEach(link => {
         const li = document.createElement('li');
-        const a  = document.createElement('a');
-        a.href        = url;
+
+        // 缩略图
+        const img = document.createElement('img');
+        img.src = link;
+        img.alt = '';
+        img.style.width       = '150px';
+        img.style.objectFit   = 'cover';
+        img.style.display     = 'block';
+        img.style.marginBottom= '4px';
+        li.appendChild(img);
+
+        // 缩略图 URL
+        const a = document.createElement('a');
+        a.href        = link;
+        a.textContent = link;
         a.target      = '_blank';
-        a.textContent = url.split('/').pop();
+        a.style.display    = 'block';
+        a.style.fontSize   = '0.8rem';
+        a.style.color      = '#0066cc';
         li.appendChild(a);
+
         ul.appendChild(li);
       });
       queryResultArea.appendChild(ul);
     }
+
   } catch (err) {
     console.error(err);
     const p = document.createElement('p');
@@ -619,6 +644,7 @@ queryFilesBtn.addEventListener('click', async () => {
     p.textContent = `🚨 查询失败：${err.message}`;
     queryResultArea.appendChild(p);
   } finally {
+    // 恢复按钮状态
     queryFilesBtn.disabled = false;
     queryFilesBtn.textContent = '查询文件';
   }

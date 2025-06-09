@@ -675,8 +675,17 @@ detectBtn.addEventListener('click', async () => {
     });
     html += '</ul>';
     if (data.thumbnail_url) {
-      html += `<p>Thumbnail URL:<code>${data.thumbnail_url}</code></p>`;
+      html += `
+        <div class="thumbnail-preview" style="margin-top:12px;">
+          <img
+            src="${data.thumbnail_url}"
+            alt="Thumbnail"
+            style="width:150px; object-fit: cover; display:block; margin-bottom:4px;"
+          />
+        </div>
+      `;
     }
+
     detectResultArea.innerHTML = html;
 
   } catch (err) {

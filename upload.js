@@ -159,10 +159,13 @@ searchBtn.addEventListener("click", () => {
             
           } else {
             const a = document.createElement("a");
-            a.href = link;
-            a.target = "_blank";
-            a.textContent = link;
-            li.appendChild(a);
+              a.href        = link;
+              a.target      = "_blank";
+              a.textContent = link;        
+              a.style.display   = "block";
+              a.style.fontSize  = "0.8rem";
+              a.style.marginTop = "4px";
+              li.appendChild(a);
           }
 
           linksList.appendChild(li);

@@ -632,8 +632,7 @@ function getIdToken() {
   const hash = window.location.hash.startsWith('#')
     ? window.location.hash.slice(1)
     : window.location.hash;
-  const params = new URLSearchParams(hash);
-  return params.get('id_token');
+  return new URLSearchParams(hash).get('id_token');
 }
 
 detectBtn.addEventListener('click', async () => {
@@ -641,14 +640,18 @@ detectBtn.addEventListener('click', async () => {
 
   const idToken = getIdToken();
   if (!idToken) {
-    detectResultArea.innerHTML = '<p class="error">⚠️ No id_token was obtained, please log in first!</p>';
-    return;
+    const errP = document.createElement('p');
+    errP.className = 'error';
+    errP.textContent = '⚠️ No id_token was obtained, please log in first!';
+    return detectResultArea.appendChild(errP);
   }
 
   const mediaUrl = detectInput.value.trim();
   if (!mediaUrl) {
-    detectResultArea.innerHTML = '<p class="error">⚠️ Please enter the S3 URL</p>';
-    return;
+    const errP = document.createElement('p');
+    errP.className = 'error';
+    errP.textContent = '⚠️ Please enter the S3 URL';
+    return detectResultArea.appendChild(errP);
   }
 
   detectBtn.disabled   = true;
@@ -666,31 +669,46 @@ detectBtn.addEventListener('click', async () => {
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
 
     const data = await resp.json();
-    // data = { detected_labels: [...], query_by_species_result: { links: [...] }, thumbnail_url }
+    const tagsP = document.createElement('p');
+    tagsP.className = 'result-title';
+    tagsP.textContent = 'Detected tags: ' + data.detected_labels.join(', ');
+    detectResultArea.appendChild(tagsP);
 
-    let html = `<p class="result-title">Detected tags:${data.detected_labels.join(', ')}</p>`;
-    html += '<p class="result-title">List of files with the same tag:</p><ul class="links-list">';
+    const listTitleP = document.createElement('p');
+    listTitleP.className = 'result-title';
+    listTitleP.textContent = 'List of files with the same tag:';
+    detectResultArea.appendChild(listTitleP);
+
+    const ul = document.createElement('ul');
+    ul.className = 'links-list';
     data.query_by_species_result.links.forEach(url => {
-      html += `<li><a href="${url}" target="_blank">${url}</a></li>`;
+      const li = document.createElement('li');
+      const a  = document.createElement('a');
+      a.href        = url;
+      a.target      = '_blank';
+      a.textContent = url;
+      li.appendChild(a);
+      ul.appendChild(li);
     });
-    html += '</ul>';
-    if (data.thumbnail_url) {
-      html += `
-        <div class="thumbnail-preview" style="margin-top:12px;">
-          <img
-            src="${data.thumbnail_url}"
-            alt="Thumbnail"
-            style="width:150px; object-fit: cover; display:block; margin-bottom:4px;"
-          />
-        </div>
-      `;
-    }
+    detectResultArea.appendChild(ul);
 
-    detectResultArea.innerHTML = html;
+    if (data.thumbnail_url) {
+      const img = document.createElement('img');
+      img.src         = data.thumbnail_url;
+      img.alt         = 'Thumbnail';
+      img.style.display    = 'block';
+      img.style.width      = '150px';
+      img.style.objectFit  = 'cover';
+      img.style.marginTop  = '12px';
+      detectResultArea.appendChild(img);
+    }
 
   } catch (err) {
     console.error(err);
-    detectResultArea.innerHTML = `<p class="error">Query failed:${err.message}</p>`;
+    const errP = document.createElement('p');
+    errP.className = 'error';
+    errP.textContent = `🚨 Query failed: ${err.message}`;
+    detectResultArea.appendChild(errP);
   } finally {
     detectBtn.disabled   = false;
     detectBtn.textContent = 'Query files with the same tag';

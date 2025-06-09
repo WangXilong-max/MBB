@@ -669,6 +669,7 @@ detectBtn.addEventListener('click', async () => {
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
 
     const data = await resp.json();
+
     const tagsP = document.createElement('p');
     tagsP.className = 'result-title';
     tagsP.textContent = 'Detected tags: ' + data.detected_labels.join(', ');
@@ -683,32 +684,48 @@ detectBtn.addEventListener('click', async () => {
     ul.className = 'links-list';
     data.query_by_species_result.links.forEach(url => {
       const li = document.createElement('li');
-      const a  = document.createElement('a');
+
+      if (url.includes('/thumbnail/')) {
+        const img = document.createElement('img');
+        img.src            = url;
+        img.alt            = 'Thumbnail';
+        img.style.display     = 'block';
+        img.style.width       = '150px';
+        img.style.objectFit   = 'cover';
+        img.style.marginBottom= '4px';
+        li.appendChild(img);
+      }
+
+      const a = document.createElement('a');
       a.href        = url;
       a.target      = '_blank';
       a.textContent = url;
+      a.style.display  = 'block';
+      a.style.fontSize = '0.8rem';
+      a.style.color    = '#0066cc';
       li.appendChild(a);
+
       ul.appendChild(li);
     });
     detectResultArea.appendChild(ul);
 
     if (data.thumbnail_url) {
       const img = document.createElement('img');
-      img.src         = data.thumbnail_url;
-      img.alt         = 'Thumbnail';
-      img.style.display    = 'block';
-      img.style.width      = '150px';
-      img.style.objectFit  = 'cover';
-      img.style.marginTop  = '12px';
+      img.src            = data.thumbnail_url;
+      img.alt            = 'Thumbnail';
+      img.style.display      = 'block';
+      img.style.width        = '150px';
+      img.style.objectFit    = 'cover';
+      img.style.marginTop    = '12px';
       detectResultArea.appendChild(img);
     }
-
   } catch (err) {
     console.error(err);
     const errP = document.createElement('p');
     errP.className = 'error';
     errP.textContent = `🚨 Query failed: ${err.message}`;
     detectResultArea.appendChild(errP);
+
   } finally {
     detectBtn.disabled   = false;
     detectBtn.textContent = 'Query files with the same tag';

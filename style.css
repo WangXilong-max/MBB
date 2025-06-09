@@ -295,12 +295,12 @@ body::before {
 .label-section #tagsInput {
   width: 100%;
   box-sizing: border-box;
-  margin-bottom: 8px; 
+  margin-bottom: 20px; 
 }
 
 .label-section #submitUpdateBtn {
   display: block;
-  margin: 0 0 16px auto; 
+  margin: 20px 0 24px auto; 
 }
 
 .label-section::after {

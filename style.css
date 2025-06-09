@@ -293,7 +293,7 @@ body::before {
 /* 编辑标签区：输入框后面的按钮加大间距 */
 .text-input + .btn,
 .text-area  + .btn {
-  margin-left: 16px;  /* 根据需要调整这个数值 */
+  margin-top: 16px;  /* 根据需要调整这个数值 */
 }
 
 /* 响应式：小屏幕时让输入框自动撑满并堆叠按钮 */

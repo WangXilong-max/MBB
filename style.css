@@ -262,7 +262,25 @@ body::before {
 .success { color: var(--color-success); }
 .error   { color: var(--color-error); }
 
-/* Responsive */
+.label-section textarea,
+.delete-section textarea {
+  width: 100%;
+  box-sizing: border-box;  
+}
+
+.label-section > button,
+.delete-section > button {
+  float: right;
+  margin-top: 12px;   
+}
+
+.label-section::after,
+.delete-section::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
 @media (max-width: 600px) {
   .input-group {
     flex-direction: column;

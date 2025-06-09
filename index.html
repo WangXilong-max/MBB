@@ -62,8 +62,7 @@
     <section class="card label-section">
       <h2 class="card-title">Tag Management</h2>
       <label for="urlsInput" class="form-label">Enter the S3 object URLs, one per line:</label>
-      <textarea id="urlsInput" class="text-area" placeholder="For example：
-https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
+      <textarea id="urlsInput" class="text-area"></textarea>
       <button id="fetchLabelsBtn" class="btn btn-primary">Get label</button>
       <div id="currentLabelsArea" class="labels-display"></div>
 
@@ -74,7 +73,7 @@ https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
       </div>
 
       <label for="tagsInput" class="form-label">Please enter the tag dictionary to operate on (JSON format):</label>
-      <input type="text" id="tagsInput" class="text-input" placeholder='For example：{"crow":2,"sparrow":1}' />
+      <input type="text" id="tagsInput" class="text-input"/>
       <button id="submitUpdateBtn" class="btn btn-primary">Update Tags</button>
       <div id="updateResultArea" class="result-area"></div>
     </section>
@@ -86,8 +85,7 @@ https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
       <label for="deleteUrlsInput" class="form-label">
       Enter the S3 object URLs to delete, one per line:
       </label>
-      <textarea id="deleteUrlsInput" class="text-area"
-        placeholder="https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
+      <textarea id="deleteUrlsInput" class="text-area"></textarea>
       <button id="deleteFilesBtn" class="btn btn-primary">Delete</button>
       <div id="deleteResultArea" class="result-area"></div>
     </section>
@@ -121,7 +119,6 @@ https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
           type="text"
           id="detectInput"
           class="text-input"
-          placeholder="https://team163-bucket.s3.amazonaws.com/image/foo.jpg"
         />
         <button id="detectBtn" class="btn">Query</button>
       </div>

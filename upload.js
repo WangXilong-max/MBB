@@ -6,7 +6,7 @@ const progressContainer= document.getElementById('progressContainer');
 const progressBar      = document.getElementById('progressBar');
 const uploadResult     = document.getElementById('uploadResult');
 
-// —— 从 URL hash 提取 Cognito ID Token —— 
+// —— URL hash take Cognito ID Token —— 
 function getIdToken() {
   const hash = window.location.hash.startsWith('#')
     ? window.location.hash.slice(1)
@@ -36,7 +36,7 @@ dropZone.addEventListener('drop', (e) => {
 async function handleFile(file) {
   const idToken = getIdToken();
   if (!idToken) {
-    alert('⚠️ 未获得 id_token，请先登录！');
+    alert('⚠️ No id_token was obtained, please log in first!');
     return;
   }
 
@@ -45,8 +45,7 @@ async function handleFile(file) {
   progressContainer.style.visibility = 'visible';
 
   try {
-    // 2. 获取 presigned URL 时带上 Authorization 头
-    uploadResult.textContent = '获取上传链接中...';
+    uploadResult.textContent = 'Getting upload link...';
     const query = `?filename=${encodeURIComponent(file.name)}`;
     const resp = await fetch(PRESIGN_API + query, {
       method: 'GET',
@@ -55,11 +54,11 @@ async function handleFile(file) {
         'Authorization': `Bearer ${idToken}`
       }
     });
-    if (!resp.ok) throw new Error(`无法获取 presigned URL，状态：${resp.status}`);
+    if (!resp.ok) throw new Error(`Can't get presigned URL，status：${resp.status}`);
     const { uploadUrl, objectKey, contentType } = await resp.json();
 
-    // 3. 上传文件到 S3（无需再带 Cognito 头，URL 自带签名）
-    uploadResult.textContent = '开始上传文件...';
+    // 3. upload to S3
+    uploadResult.textContent = 'Starting to upload file...';
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', uploadUrl, true);
     if (contentType) xhr.setRequestHeader('Content-Type', contentType);
@@ -74,9 +73,9 @@ async function handleFile(file) {
       if (xhr.readyState === XMLHttpRequest.DONE) {
         if (xhr.status === 200) {
           progressBar.style.width = '100%';
-          uploadResult.innerHTML = `<p class="success">上传成功！</p>`;
+          uploadResult.innerHTML = `<p class="success">Upload Successfully！</p>`;
         } else {
-          throw new Error(`上传失败，状态：${xhr.status}`);
+          throw new Error(`Upload failed, status：${xhr.status}`);
         }
       }
     };
@@ -84,7 +83,7 @@ async function handleFile(file) {
 
   } catch (err) {
     progressContainer.style.visibility = 'hidden';
-    uploadResult.innerHTML = `<p class="error">上传出错：${err.message}</p>`;
+    uploadResult.innerHTML = `<p class="error">Upload error：${err.message}</p>`;
     console.error(err);
   }
 }
@@ -94,7 +93,7 @@ const searchBtn = document.getElementById("searchBtn");
 const speciesInput = document.getElementById("speciesInput");
 const linksList = document.getElementById("linksList");
 
-// 从 window.location.hash 里提取 token
+// get token
 function getIdToken() {
   const hash = window.location.hash.startsWith("#")
     ? window.location.hash.slice(1)
@@ -106,18 +105,18 @@ function getIdToken() {
 searchBtn.addEventListener("click", () => {
   const idToken = getIdToken();
   if (!idToken) {
-    alert("未获得 id_token，请先登录！");
+    alert("No id_token was obtained, please log in first!");
     return;
   }
 
   const raw = speciesInput.value.trim();
   if (!raw) {
-    alert("请先输入至少一个物种（英文小写，逗号分隔）。");
+    alert("Please enter at least one species (comma separated).");
     return;
   }
   const arr = raw.split(",").map(s => s.trim()).filter(s => s);
   if (!arr.length) {
-    alert("请输入合法的物种列表，比如：crow 或 crow,pigeon");
+    alert("Please enter a valid species list, for example: crow or crow,pigeon");
     return;
   }
 
@@ -128,12 +127,11 @@ searchBtn.addEventListener("click", () => {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      // 根据你在 API Gateway Cognito Authorizer 中的配置，决定是否要加 “Bearer ” 前缀
       "Authorization": `Bearer ${idToken}`
     }
   })
     .then(resp => {
-      if (!resp.ok) throw new Error("HTTP 错误：" + resp.status);
+      if (!resp.ok) throw new Error("HTTP error：" + resp.status);
       return resp.json();
     })
     .then(data => {
@@ -171,7 +169,7 @@ searchBtn.addEventListener("click", () => {
         });
       } else {
         const li = document.createElement("li");
-        li.textContent = "没有匹配到任何文件。";
+        li.textContent = "No files were matched.";
         linksList.appendChild(li);
       }
     })
@@ -179,7 +177,7 @@ searchBtn.addEventListener("click", () => {
       console.error(err);
       linksList.innerHTML = "";
       const li = document.createElement("li");
-      li.textContent = "查询出错，请检查控制台日志。";
+      li.textContent = "Query error, please check the console log.";
       linksList.appendChild(li);
     });
 });
@@ -189,7 +187,6 @@ const thumbBtn    = document.getElementById("thumbBtn");
 const thumbInput  = document.getElementById("thumbInput");
 const thumbResult = document.getElementById("thumbResult");
 
-// —— 从 URL hash 提取 Cognito ID Token —— 
 function getIdToken() {
   const hash = window.location.hash.startsWith("#")
     ? window.location.hash.slice(1)
@@ -199,37 +196,32 @@ function getIdToken() {
 }
 
 thumbBtn.addEventListener("click", async () => {
-  // 清空上次结果
   while (thumbResult.firstChild) {
     thumbResult.removeChild(thumbResult.firstChild);
   }
 
-  // 1. 检查登录 token
   const idToken = getIdToken();
   if (!idToken) {
     const errP = document.createElement("p");
     errP.className = "error";
-    errP.textContent = "⚠️ 未获得 id_token，请先登录！";
+    errP.textContent = "⚠️ No id_token was obtained, please log in first!";
     thumbResult.appendChild(errP);
     return;
   }
 
-  // 2. 校验用户输入
   const thumbUrl = thumbInput.value.trim();
   if (!thumbUrl) {
     const errP = document.createElement("p");
     errP.className = "error";
-    errP.textContent = "⚠️ 请先输入一个缩略图 S3 URL。";
+    errP.textContent = "⚠️ Please enter a thumbnail S3 URL first.";
     thumbResult.appendChild(errP);
     return;
   }
 
-  // 3. 禁用按钮并提示中
   thumbBtn.disabled = true;
-  thumbBtn.textContent = "查询中...";
+  thumbBtn.textContent = "Searching...";
 
   try {
-    // 4. 发起带鉴权的请求
     const resp = await fetch(API_ENDPOINT_FIND_BY_THUMB, {
       method: "POST",
       headers: {
@@ -238,24 +230,22 @@ thumbBtn.addEventListener("click", async () => {
       },
       body: JSON.stringify({ thumbnail_url: thumbUrl })
     });
-    if (!resp.ok) throw new Error("后端返回状态：" + resp.status);
+    if (!resp.ok) throw new Error("Backend return status：" + resp.status);
 
     const data = await resp.json();
-    if (!data.full_image_url) throw new Error("后端未返回 full_image_url");
+    if (!data.full_image_url) throw new Error("The backend did not return full_image_url");
 
-    // 5. 用 DOM API 显示成功提示
     const successP = document.createElement("p");
     successP.className = "success";
-    successP.textContent = "查询成功！";
+    successP.textContent = "Query successful!";
     thumbResult.appendChild(successP);
 
-    // 6. 创建“下载原图”链接
     const fullUrl = data.full_image_url;
     const filename = fullUrl.split("/").pop();
     const dlLink = document.createElement("a");
     dlLink.href = fullUrl;
     dlLink.textContent = "Check & download originnal picture.";
-    dlLink.download = filename;       // 关键 ——  点击直接下载
+    dlLink.download = filename;  
     dlLink.target = "_blank";
     dlLink.style.display = "block";
     dlLink.style.marginTop = "8px";
@@ -265,12 +255,11 @@ thumbBtn.addEventListener("click", async () => {
     console.error(err);
     const errP = document.createElement("p");
     errP.className = "error";
-    errP.textContent = `❌ 查询失败：${err.message}`;
+    errP.textContent = `❌ Query failed：${err.message}`;
     thumbResult.appendChild(errP);
   } finally {
-    // 7. 恢复按钮状态
     thumbBtn.disabled = false;
-    thumbBtn.textContent = "查询原图";
+    thumbBtn.textContent = "Query original image";
   }
 });
 
@@ -292,30 +281,29 @@ function getIdToken() {
   return params.get('id_token');
 }
 
-// —— 获取当前标签 —— 
 fetchLabelsBtn.addEventListener("click", async () => {
   currentLabelsArea.innerHTML = "";
   updateResultArea.innerHTML  = "";
 
   const idToken = getIdToken();
   if (!idToken) {
-    currentLabelsArea.innerHTML = `<div class="error">⚠️ 未获得 id_token，请先登录！</div>`;
+    currentLabelsArea.innerHTML = `<div class="error">⚠️ No id_token was obtained, please log in first!</div>`;
     return;
   }
 
   const rawUrls = urlsInput.value.trim();
   if (!rawUrls) {
-    currentLabelsArea.innerHTML = `<div class="error">⚠️ 请先输入至少一个 URL，每行一个。</div>`;
+    currentLabelsArea.innerHTML = `<div class="error">⚠️ Please enter at least one URL first, one per line.</div>`;
     return;
   }
   const urlList = rawUrls.split("\n").map(l => l.trim()).filter(l => l);
   if (!urlList.length) {
-    currentLabelsArea.innerHTML = `<div class="error">⚠️ 无效的 URL 列表，请检查输入。</div>`;
+    currentLabelsArea.innerHTML = `<div class="error">⚠️ Invalid URL list, please check your input.</div>`;
     return;
   }
 
   fetchLabelsBtn.disabled = true;
-  fetchLabelsBtn.textContent = "查询中...";
+  fetchLabelsBtn.textContent = "Searching...";
 
   try {
     const qs = urlList.map(u => "url=" + encodeURIComponent(u)).join("&");
@@ -326,7 +314,7 @@ fetchLabelsBtn.addEventListener("click", async () => {
         "Authorization": `Bearer ${idToken}`
       }
     });
-    if (!resp.ok) throw new Error("后端返回状态：" + resp.status);
+    if (!resp.ok) throw new Error("Backend return status：" + resp.status);
     const data = await resp.json();
 
     currentLabelsArea.innerHTML = "";
@@ -351,31 +339,30 @@ fetchLabelsBtn.addEventListener("click", async () => {
 
   } catch (err) {
     console.error(err);
-    currentLabelsArea.innerHTML = `<div class="error">❌ 查询失败：${err.message}</div>`;
+    currentLabelsArea.innerHTML = `<div class="error">❌ Query failed：${err.message}</div>`;
   } finally {
     fetchLabelsBtn.disabled = false;
-    fetchLabelsBtn.textContent = "获取当前标签";
+    fetchLabelsBtn.textContent = "Get the current label";
   }
 });
 
-// —— 提交更新标签 —— 
 submitUpdateBtn.addEventListener("click", async () => {
   updateResultArea.innerHTML = "";
 
   const idToken = getIdToken();
   if (!idToken) {
-    updateResultArea.innerHTML = `<div class="error">⚠️ 未获得 id_token，请先登录！</div>`;
+    updateResultArea.innerHTML = `<div class="error">⚠️ No id_token was obtained, please log in first!</div>`;
     return;
   }
 
   const rawUrls = urlsInput.value.trim();
   if (!rawUrls) {
-    updateResultArea.innerHTML = `<div class="error">⚠️ 请先在上方输入 URL 列表并获取当前标签。</div>`;
+    updateResultArea.innerHTML = `<div class="error">⚠️ Please first enter a list of URLs above and get the current tabs.</div>`;
     return;
   }
   const urlList = rawUrls.split("\n").map(l => l.trim()).filter(l => l);
   if (!urlList.length) {
-    updateResultArea.innerHTML = `<div class="error">⚠️ 无效的 URL 列表，请检查输入。</div>`;
+    updateResultArea.innerHTML = `<div class="error">⚠️ Invalid URL list, please check your input.</div>`;
     return;
   }
 
@@ -383,21 +370,21 @@ submitUpdateBtn.addEventListener("click", async () => {
   try {
     tagsObj = JSON.parse(tagsInput.value.trim());
     if (typeof tagsObj !== "object" || Array.isArray(tagsObj)) {
-      throw new Error("必须是一个 {\"tag\":number, ...} 对象");
+      throw new Error("Must be a {\"tag\":number, ...} Object");
     }
     Object.entries(tagsObj).forEach(([k, v]) => {
-      if (typeof v !== "number") throw new Error(`标签 "${k}" 的值必须是数字`);
+      if (typeof v !== "number") throw new Error(`Label "${k}" value must be a number`);
     });
   } catch (err) {
-    updateResultArea.innerHTML = `<div class="error">⚠️ 标签字典 JSON 错误：${err.message}</div>`;
+    updateResultArea.innerHTML = `<div class="error">⚠️ Tags dictionary JSON error：${err.message}</div>`;
     return;
   }
 
   const opType   = document.querySelector('input[name="opType"]:checked').value;
-  const operation = parseInt(opType, 10);  // 1=累加，0=减少
+  const operation = parseInt(opType, 10); 
 
   submitUpdateBtn.disabled = true;
-  submitUpdateBtn.textContent = "提交中...";
+  submitUpdateBtn.textContent = "Uploading...";
 
   const payload = { url: urlList, operation, tags: tagsObj };
 
@@ -410,15 +397,15 @@ submitUpdateBtn.addEventListener("click", async () => {
       },
       body: JSON.stringify(payload)
     });
-    if (!resp.ok) throw new Error("后端返回状态：" + resp.status);
+    if (!resp.ok) throw new Error("Backend return status：" + resp.status);
     const text = await resp.text();
-    updateResultArea.innerHTML = `<div class="result">✅ 操作成功，后端返回：<br>${text}</div>`;
+    updateResultArea.innerHTML = `<div class="result">✅ The operation is successful, and the backend returns：<br>${text}</div>`;
   } catch (err) {
     console.error(err);
-    updateResultArea.innerHTML = `<div class="error">❌ 更新失败：${err.message}</div>`;
+    updateResultArea.innerHTML = `<div class="error">❌ Update failed：${err.message}</div>`;
   } finally {
     submitUpdateBtn.disabled = false;
-    submitUpdateBtn.textContent = "提交更新标签";
+    submitUpdateBtn.textContent = "Update Tags";
   }
 });
 
@@ -427,7 +414,6 @@ const deleteUrlsInput   = document.getElementById('deleteUrlsInput');
 const deleteFilesBtn    = document.getElementById('deleteFilesBtn');
 const deleteResultArea  = document.getElementById('deleteResultArea');
 
-// —— 从 URL hash 提取 Cognito ID Token —— 
 function getIdToken() {
   const hash = window.location.hash.startsWith("#")
     ? window.location.hash.slice(1)
@@ -437,20 +423,17 @@ function getIdToken() {
 }
 
 deleteFilesBtn.addEventListener('click', async () => {
-  // 清空旧结果
   deleteResultArea.innerHTML = '';
 
-  // 1. 获取并校验 id_token
   const idToken = getIdToken();
   if (!idToken) {
-    deleteResultArea.innerHTML = `<p class="error">⚠️ 未获得 id_token，请先登录！</p>`;
+    deleteResultArea.innerHTML = `<p class="error">⚠️ No id_token was obtained, please log in first!</p>`;
     return;
   }
 
-  // 2. 读取并验证 URL 列表
   const raw = deleteUrlsInput.value.trim();
   if (!raw) {
-    deleteResultArea.innerHTML = `<p class="error">⚠️ 请先输入至少一个 URL</p>`;
+    deleteResultArea.innerHTML = `<p class="error">⚠️ Please enter at least one URL first</p>`;
     return;
   }
   const urlList = raw
@@ -458,16 +441,14 @@ deleteFilesBtn.addEventListener('click', async () => {
     .map(u => u.trim())
     .filter(u => u.length);
   if (!urlList.length) {
-    deleteResultArea.innerHTML = `<p class="error">⚠️ 无效的 URL 列表</p>`;
+    deleteResultArea.innerHTML = `<p class="error">⚠️ Invalid URL List</p>`;
     return;
   }
 
-  // 3. 禁用按钮并提示中
   deleteFilesBtn.disabled = true;
-  deleteFilesBtn.textContent = '删除中…';
+  deleteFilesBtn.textContent = 'Deleting...';
 
   try {
-    // 4. 发起带鉴权的删除请求
     const resp = await fetch(API_ENDPOINT_DELETE_FILES, {
       method: 'POST',
       headers: {
@@ -480,19 +461,18 @@ deleteFilesBtn.addEventListener('click', async () => {
     const data = await resp.json();
     if (resp.ok) {
       deleteResultArea.innerHTML =
-        `<p class="success">✅ 删除成功：${data.message}</p>`;
+        `<p class="success">✅ Deletion successful:${data.message}</p>`;
     } else {
       deleteResultArea.innerHTML =
-        `<p class="error">❌ 删除失败：${data.message || resp.status}</p>`;
+        `<p class="error">❌ Deletion failed:${data.message || resp.status}</p>`;
     }
   } catch (err) {
     console.error(err);
     deleteResultArea.innerHTML =
-      `<p class="error">🚨 异常：${err.message}</p>`;
+      `<p class="error">🚨 error:${err.message}</p>`;
   } finally {
-    // 5. 恢复按钮状态
     deleteFilesBtn.disabled = false;
-    deleteFilesBtn.textContent = '删除选中文件';
+    deleteFilesBtn.textContent = 'Delete selected files';
   }
 });
 
@@ -502,7 +482,6 @@ const addTagBtn         = document.getElementById('addTagBtn');
 const queryFilesBtn     = document.getElementById('queryFilesBtn');
 const queryResultArea   = document.getElementById('queryResultArea');
 
-// 从 URL hash 提取 Cognito ID Token
 function getIdToken() {
   const hash = window.location.hash.startsWith('#') 
     ? window.location.hash.slice(1) 
@@ -510,7 +489,6 @@ function getIdToken() {
   return new URLSearchParams(hash).get('id_token');
 }
 
-// 创建一行 tag + count + 删除 按钮
 function createTagRow() {
   const row = document.createElement('div');
   row.className = 'form-row tag-row';
@@ -538,7 +516,6 @@ function createTagRow() {
   tagContainer.appendChild(row);
 }
 
-// 收集所有 tag–count 对
 function collectTags() {
   const tags = {};
   document.querySelectorAll('.tag-row').forEach(row => {
@@ -551,42 +528,34 @@ function collectTags() {
   return tags;
 }
 
-// 初始化：如果没有任何 tag-row，就加一行
 if (tagContainer.querySelectorAll('.tag-row').length === 0) {
   createTagRow();
 }
 
-// 绑定“添加 Tag”按钮
 addTagBtn.addEventListener('click', createTagRow);
 
-// 绑定“查询文件”按钮
 queryFilesBtn.addEventListener('click', async () => {
-  // 清空上次结果
   queryResultArea.innerHTML = '';
-
-  // 检验登录
   const idToken = getIdToken();
   if (!idToken) {
     const p = document.createElement('p');
     p.className = 'error';
-    p.textContent = '⚠️ 未获得 id_token，请先登录！';
+    p.textContent = '⚠️ No id_token was obtained, please log in first!';
     queryResultArea.appendChild(p);
     return;
   }
 
-  // 收集 tags
   const tags = collectTags();
   if (Object.keys(tags).length === 0) {
     const p = document.createElement('p');
     p.className = 'error';
-    p.textContent = '⚠️ 请至少填写一个有效的 Tag 和 Count。';
+    p.textContent = '⚠️ Please fill in at least one valid Tag and Count.';
     queryResultArea.appendChild(p);
     return;
   }
 
-  // 发请求前禁用按钮
   queryFilesBtn.disabled = true;
-  queryFilesBtn.textContent = '查询中…';
+  queryFilesBtn.textContent = 'Searching...';
 
   try {
     const resp = await fetch(API_QUERY_ENDPOINT, {
@@ -612,7 +581,7 @@ queryFilesBtn.addEventListener('click', async () => {
     ul.innerHTML = '';
     if (!Array.isArray(data.links) || data.links.length === 0) {
       const li = document.createElement('li');
-      li.textContent = 'ℹ️ 未找到满足条件的文件。';
+      li.textContent = 'ℹ️ No files matching the criteria were found.';
       ul.appendChild(li);
     } else {
       data.links.forEach(link => {
@@ -645,12 +614,11 @@ queryFilesBtn.addEventListener('click', async () => {
     console.error(err);
     const p = document.createElement('p');
     p.className = 'error';
-    p.textContent = `🚨 查询失败：${err.message}`;
+    p.textContent = `🚨 Query failed:${err.message}`;
     queryResultArea.appendChild(p);
   } finally {
-    // 恢复按钮状态
     queryFilesBtn.disabled = false;
-    queryFilesBtn.textContent = '查询文件';
+    queryFilesBtn.textContent = 'Query File';
   }
 });
 
@@ -671,25 +639,22 @@ function getIdToken() {
 detectBtn.addEventListener('click', async () => {
   detectResultArea.innerHTML = '';
 
-  // 1. 校验登录
   const idToken = getIdToken();
   if (!idToken) {
-    detectResultArea.innerHTML = '<p class="error">⚠️ 未获得 id_token，请先登录！</p>';
+    detectResultArea.innerHTML = '<p class="error">⚠️ No id_token was obtained, please log in first!</p>';
     return;
   }
 
-  // 2. 读取并校验输入
   const mediaUrl = detectInput.value.trim();
   if (!mediaUrl) {
-    detectResultArea.innerHTML = '<p class="error">⚠️ 请输入 S3 URL</p>';
+    detectResultArea.innerHTML = '<p class="error">⚠️ Please enter the S3 URL</p>';
     return;
   }
 
   detectBtn.disabled   = true;
-  detectBtn.textContent = '查询中…';
+  detectBtn.textContent = 'Searching...';
 
   try {
-    // 3. 发送 POST 请求
     const resp = await fetch(API_ENDPOINT_DETECT, {
       method: 'POST',
       headers: {
@@ -703,23 +668,22 @@ detectBtn.addEventListener('click', async () => {
     const data = await resp.json();
     // data = { detected_labels: [...], query_by_species_result: { links: [...] }, thumbnail_url }
 
-    // 4. 拼 HTML 展示
-    let html = `<p class="result-title">检测到的标签：${data.detected_labels.join(', ')}</p>`;
-    html += '<p class="result-title">同标签文件列表：</p><ul class="links-list">';
+    let html = `<p class="result-title">Detected tags:${data.detected_labels.join(', ')}</p>`;
+    html += '<p class="result-title">List of files with the same tag:</p><ul class="links-list">';
     data.query_by_species_result.links.forEach(url => {
       html += `<li><a href="${url}" target="_blank">${url}</a></li>`;
     });
     html += '</ul>';
     if (data.thumbnail_url) {
-      html += `<p>缩略图 URL：<code>${data.thumbnail_url}</code></p>`;
+      html += `<p>Thumbnail URL:<code>${data.thumbnail_url}</code></p>`;
     }
     detectResultArea.innerHTML = html;
 
   } catch (err) {
     console.error(err);
-    detectResultArea.innerHTML = `<p class="error">查询失败：${err.message}</p>`;
+    detectResultArea.innerHTML = `<p class="error">Query failed:${err.message}</p>`;
   } finally {
     detectBtn.disabled   = false;
-    detectBtn.textContent = '查询同标签文件';
+    detectBtn.textContent = 'Query files with the same tag';
   }
 });

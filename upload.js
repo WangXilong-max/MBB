@@ -601,17 +601,23 @@ queryFilesBtn.addEventListener('click', async () => {
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.message || resp.statusText);
 
-    // 渲染结果
+
+    let ul = queryResultArea.querySelector('ul.links-list');
+    if (!ul) {
+      ul = document.createElement('ul');
+      ul.className = 'links-list';
+      queryResultArea.appendChild(ul);
+    }
+
+    ul.innerHTML = '';
     if (!Array.isArray(data.links) || data.links.length === 0) {
-      const p = document.createElement('p');
-      p.textContent = 'ℹ️ 未找到满足条件的文件。';
-      queryResultArea.appendChild(p);
+      const li = document.createElement('li');
+      li.textContent = 'ℹ️ 未找到满足条件的文件。';
+      ul.appendChild(li);
     } else {
-      const ul = document.createElement('ul');
       data.links.forEach(link => {
         const li = document.createElement('li');
 
-        // 缩略图
         const img = document.createElement('img');
         img.src = link;
         img.alt = '';
@@ -621,7 +627,6 @@ queryFilesBtn.addEventListener('click', async () => {
         img.style.marginBottom= '4px';
         li.appendChild(img);
 
-        // 缩略图 URL
         const a = document.createElement('a');
         a.href        = link;
         a.textContent = link;
@@ -633,8 +638,8 @@ queryFilesBtn.addEventListener('click', async () => {
 
         ul.appendChild(li);
       });
-      queryResultArea.appendChild(ul);
     }
+    
 
   } catch (err) {
     console.error(err);

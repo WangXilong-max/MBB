@@ -13,28 +13,22 @@
   --color-error: #dc2626;
 }
 
-/* 重置浏览器默认 padding/margin */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* 背景图 + 全局样式 */
 body {
-  /* 背景图：请把 background.jpg 放在项目的 assets 目录下 */
   background: url('./assets/background.png') no-repeat center center fixed;
   background-size: cover;
   position: relative;
-
-  /* 原有全局样式 */
   font-family: "Helvetica Neue", Arial, sans-serif;
   color: var(--color-text-main);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* 半透明遮罩层 */
 body::before {
   content: "";
   position: absolute;
@@ -43,7 +37,6 @@ body::before {
   z-index: 0;
 }
 
-/* 页面整体居中容器 */
 .container {
   max-width: 800px;
   margin: 0 auto;
@@ -52,10 +45,8 @@ body::before {
   z-index: 1;
 }
 
-/* 头部标题 */
 .header {
   text-align: center;
-  /* 上下外边距一次性写在这里：20vh 从顶部往下推到接近屏幕中部 */
   margin: 20vh 0 80px;  
 }
 
@@ -63,17 +54,14 @@ body::before {
   font-size: 4rem;
   margin-bottom: 18px;
   color: #000; 
-  /* 2px x 2px 位移，4px 模糊，轻微阴影效果 */
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .header p {
   font-size: 1rem;
-  color: #000;  /* 纯黑 */
-  /* 1px x 1px 位移，2px 模糊，更柔和的副标题阴影 */
+  color: #000; 
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
-
 
 .card {
   background-color: var(--color-card-bg);
@@ -84,7 +72,6 @@ body::before {
   margin-bottom: 24px;
 }
 
-/* 卡片内部小标题 */
 .card-title {
   font-size: 1.25rem;
   color: var(--color-text-main);
@@ -93,7 +80,6 @@ body::before {
   padding-bottom: 8px;
 }
 
-/* 表单标签 */
 .form-label {
   display: block;
   font-size: 0.95rem;
@@ -101,7 +87,6 @@ body::before {
   margin-bottom: 6px;
 }
 
-/* 文本输入框 */
 .text-input {
   width: calc(100% - 112px);
   padding: 8px 10px;
@@ -112,7 +97,6 @@ body::before {
   color: var(--color-text-main);
 }
 
-/* 文本域 */
 .text-area {
   width: 100%;
   padding: 10px;
@@ -126,7 +110,6 @@ body::before {
   margin-bottom: 12px;
 }
 
-/* 通用按钮 */
 .btn {
   display: inline-block;
   padding: 8px 16px;
@@ -144,7 +127,6 @@ body::before {
   background-color: var(--color-primary-hover);
 }
 
-/* 特殊强调按钮 */
 .btn-primary {
   background-color: var(--color-primary);
 }
@@ -152,14 +134,12 @@ body::before {
   background-color: var(--color-primary-hover);
 }
 
-/* 表单组：输入框 + 按钮 横向排列 */
 .input-group {
   display: flex;
   align-items: center;
   margin-bottom: 12px;
 }
 
-/* 下拉/拖拽上传区域 */
 .drop-zone {
   position: relative;
   border: 2px dashed var(--color-border);
@@ -191,7 +171,6 @@ body::before {
   cursor: pointer;
 }
 
-/* 进度条容器 */
 .progress-container {
   width: 100%;
   background-color: #e5e7eb;
@@ -207,7 +186,6 @@ body::before {
   transition: width 0.3s ease;
 }
 
-/* 搜索结果区域 */
 .result-area {
   margin-top: 12px;
 }
@@ -232,7 +210,6 @@ body::before {
   text-decoration: underline;
 }
 
-/* 标签管理区：当前标签展示 */
 .labels-display {
   background-color: #f1f5f9;
   padding: 12px;
@@ -244,7 +221,6 @@ body::before {
   margin-bottom: 12px;
 }
 
-/* 单选框组 */
 .radio-group {
   display: flex;
   gap: 20px;
@@ -259,7 +235,6 @@ body::before {
   margin-right: 6px;
 }
 
-/* 成功/错误提示 */
 .success {
   color: var(--color-success);
 }
@@ -267,36 +242,32 @@ body::before {
   color: var(--color-error);
 }
 
-/* 1. 让标签查询那边的 <ul> 也去掉圆点 */
 .result-area ul {
   list-style: none;
   padding-left: 0;
 }
 
-/* 2. 美化 “tag-row” 排版，保证 input + input + 按钮 横向对齐 */
 .tag-row {
   display: flex;
   align-items: center;
-  gap: 8px;          /* 各个控件之间留一点空隙 */
+  gap: 8px;   
   margin-bottom: 12px;
 }
 .tag-row .tag-input,
 .tag-row .count-input {
-  flex: 1;           /* 平均分摊可用宽度 */
-  min-width: 0;      /* 防止输入框超出容器 */
+  flex: 1;    
+  min-width: 0;  
 }
 .tag-row .remove-tag-btn {
-  flex-shrink: 0;    /* 保持删除按钮大小不变 */
-  padding: 0 8px;    /* 根据需要微调按钮内边距 */
+  flex-shrink: 0;  
+  padding: 0 8px;  
 }
 
-/* 编辑标签区：输入框后面的按钮加大间距 */
 .text-input + .btn,
 .text-area  + .btn {
-  margin-top: 16px;  /* 根据需要调整这个数值 */
+  margin-top: 16px; 
 }
 
-/* 响应式：小屏幕时让输入框自动撑满并堆叠按钮 */
 @media (max-width: 600px) {
   .input-group {
     flex-direction: column;

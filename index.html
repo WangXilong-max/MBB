@@ -34,11 +34,11 @@
     <section class="card search-section">
       <h2 class="card-title">Search identified files by species</h2>
       <label for="speciesInput" class="form-label">
-        Enter the bird species (lowercase letters, separate multiple species with commas), for example:<code>crow,pigeon</code>
+        Enter the bird species, for example:<code>crow,pigeon</code>
       </label>
       <div class="input-group">
         <input type="text" id="speciesInput" class="text-input" placeholder="" />
-        <button id="searchBtn" class="btn">Start query</button>
+        <button id="searchBtn" class="btn">Query</button>
       </div>
       <div id="searchResults" class="result-area">
         <h3 class="result-title">Query results:</h3>
@@ -54,7 +54,7 @@
       </label>
       <div class="input-group">
         <input type="text" id="thumbInput" class="text-input" placeholder="" />
-        <button id="thumbBtn" class="btn">Query original image</button>
+        <button id="thumbBtn" class="btn">Query</button>
       </div>
       <div id="thumbResult" class="result-area"></div>
     </section>
@@ -62,36 +62,34 @@
     <!-- 4. 标签管理 -->
     <section class="card label-section">
       <h2 class="card-title">Tag Management</h2>
-
       <label for="urlsInput" class="form-label">Enter the S3 object URLs, one per line:</label>
       <textarea id="urlsInput" class="text-area" placeholder="For example：
 https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
-      <button id="fetchLabelsBtn" class="btn btn-primary">Get the current label</button>
+      <button id="fetchLabelsBtn" class="btn btn-primary">Get label</button>
       <div id="currentLabelsArea" class="labels-display"></div>
 
       <label class="form-label">Please select the operation type:</label>
       <div class="radio-group">
-        <label><input type="radio" name="opType" value="1" checked /> Add/Add Tags</label>
-        <label><input type="radio" name="opType" value="0" /> Reduce/remove tags/label>
+        <label><input type="radio" name="opType" value="1" checked /> Add Tags</label>
+        <label><input type="radio" name="opType" value="0" /> Reduce Tags</label>
       </div>
 
       <label for="tagsInput" class="form-label">Please enter the tag dictionary to operate on (JSON format):</label>
       <input type="text" id="tagsInput" class="text-input" placeholder='For example：{"crow":2,"sparrow":1}' />
-      <button id="submitUpdateBtn" class="btn btn-primary">Submit Update Tags</button>
+      <button id="submitUpdateBtn" class="btn btn-primary">Update Tags</button>
       <div id="updateResultArea" class="result-area"></div>
     </section>
 
     <!-- 5. 删除文件 -->
     <section class="card delete-section">
-      <h2 class="card-title">Deleting files</h2>
+      <h2 class="card-title">Delete Files</h2>
 
       <label for="deleteUrlsInput" class="form-label">
       Enter the S3 object URLs to delete, one per line:
       </label>
       <textarea id="deleteUrlsInput" class="text-area"
-        placeholder="For example：  
-https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
-      <button id="deleteFilesBtn" class="btn btn-primary">Delete selected files</button>
+        placeholder="https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
+      <button id="deleteFilesBtn" class="btn btn-primary">Delete</button>
       <div id="deleteResultArea" class="result-area"></div>
     </section>
 
@@ -108,8 +106,8 @@ https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
         </div>
       </div>
 
-      <button id="addTagBtn" class="btn btn-sm btn-outline-primary">添加 Tag</button>
-      <button id="queryFilesBtn" class="btn btn-secondary">查询文件</button>
+      <button id="addTagBtn" class="btn btn-sm btn-outline-primary">Add Tag</button>
+      <button id="queryFilesBtn" class="btn btn-secondary">Query</button>
       <div id="queryResultArea" class="result-area"></div>
     </section>
 
@@ -126,7 +124,7 @@ https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
           class="text-input"
           placeholder="https://team163-bucket.s3.amazonaws.com/image/foo.jpg"
         />
-        <button id="detectBtn" class="btn">Query files with the same tag</button>
+        <button id="detectBtn" class="btn">Query</button>
       </div>
       <div id="detectResultArea" class="result-area"></div>
     </section>

@@ -16,7 +16,7 @@
       <p>Monash Birdy Buddies (MBB) is a team of bird enthusiasts at Monash University, made up of researchers, students and staff, who promote bird research and conservation by collecting and analysing photographs, audio and video recordings of birds.</p>
     </header>
 
-    <!-- 1. 拖拽/点击上传区 -->
+    <!-- 1. upload files -->
     <section class="card upload-section">
       <h2 class="card-title">Upload Files</h2>
       <div id="dropZone" class="drop-zone">
@@ -30,7 +30,7 @@
       <div id="uploadResult" class="upload-result"></div>
     </section>
 
-    <!-- 2. 按物种检索 -->
+    <!-- 2. query by species -->
     <section class="card search-section">
       <h2 class="card-title">Search Files by Species</h2>
       <label for="speciesInput" class="form-label">
@@ -45,7 +45,7 @@
       </div>
     </section>
 
-    <!-- 3. 缩略图→原图 -->
+    <!-- 3. thumbnail -> original -->
     <section class="card thumb-section">
       <h2 class="card-title">Find Image Based on Thumbnail S3 URL</h2>
       <label for="thumbInput" class="form-label">
@@ -58,7 +58,7 @@
       <div id="thumbResult" class="result-area"></div>
     </section>
 
-    <!-- 4. 标签管理 -->
+    <!-- 4. tag management -->
     <section class="card label-section">
       <h2 class="card-title">Tag Management</h2>
       <label for="urlsInput" class="form-label">Enter the S3 object URLs, one per line:</label>
@@ -79,7 +79,7 @@ https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
       <div id="updateResultArea" class="result-area"></div>
     </section>
 
-    <!-- 5. 删除文件 -->
+    <!-- 5. delete -->
     <section class="card delete-section">
       <h2 class="card-title">Delete Files</h2>
 
@@ -92,11 +92,9 @@ https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
       <div id="deleteResultArea" class="result-area"></div>
     </section>
 
-    <!-- 6.  -->
+    <!-- 6. search by files tag  -->
     <section class="card query-section">
       <h2 class="card-title">Search Files by Tags</h2>
-
-      <!-- 容器，用来放多行 tag-row -->
       <div id="tagContainer">
         <div class="form-row tag-row">
           <input type="text" class="form-control tag-input" placeholder="Tag name (e.g. pigeon)" />
@@ -112,7 +110,7 @@ https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
       </div>
     </section>
 
-    <!-- 7.  -->
+    <!-- 7. query by media url -->
     <section class="card detect-section">
       <h2 class="card-title">Query Files by Media URL</h2>
       <label for="detectInput" class="form-label">
@@ -131,7 +129,6 @@ https://team163-bucket.s3.amazonaws.com/image/foo.jpg"></textarea>
     </section>
   </div>
 
-  <!-- 引入脚本 -->
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="upload.js"></script>
 </body>

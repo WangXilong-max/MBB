@@ -34,7 +34,6 @@ dropZone.addEventListener('drop', (e) => {
 });
 
 async function handleFile(file) {
-  // 1. 获取并校验 id_token
   const idToken = getIdToken();
   if (!idToken) {
     alert('⚠️ 未获得 id_token，请先登录！');

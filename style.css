@@ -291,3 +291,20 @@ body::before {
     margin-bottom: 8px;
   }
 }
+
+.label-section #tagsInput {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px; 
+}
+
+.label-section #submitUpdateBtn {
+  display: block;
+  margin: 0 0 16px auto; 
+}
+
+.label-section::after {
+  content: "";
+  display: table;
+  clear: both;
+}

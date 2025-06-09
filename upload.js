@@ -262,7 +262,7 @@ thumbBtn.addEventListener("click", async () => {
     thumbResult.appendChild(errP);
   } finally {
     thumbBtn.disabled = false;
-    thumbBtn.textContent = "Query original image";
+    thumbBtn.textContent = "Query";
   }
 });
 
@@ -345,7 +345,7 @@ fetchLabelsBtn.addEventListener("click", async () => {
     currentLabelsArea.innerHTML = `<div class="error">❌ Query failed：${err.message}</div>`;
   } finally {
     fetchLabelsBtn.disabled = false;
-    fetchLabelsBtn.textContent = "Get the current label";
+    fetchLabelsBtn.textContent = "Get label";
   }
 });
 
@@ -402,7 +402,7 @@ submitUpdateBtn.addEventListener("click", async () => {
     });
     if (!resp.ok) throw new Error("Backend return status：" + resp.status);
     const text = await resp.text();
-    updateResultArea.innerHTML = `<div class="result">✅ The operation is successful, and the backend returns：<br>${text}</div>`;
+    updateResultArea.innerHTML = `<div class="result">✅ Update successful</div>`;
   } catch (err) {
     console.error(err);
     updateResultArea.innerHTML = `<div class="error">❌ Update failed：${err.message}</div>`;
